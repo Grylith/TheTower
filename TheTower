@@ -1,0 +1,2681 @@
+# UE5 Blueprint Reference Doc
+ 
+This file tracks all working Blueprint solutions from our session.
+Updated continuously to prevent context loss.
+ 
+---
+ 
+## Ground Rules
+- All solutions use UE5 Blueprint system only (no C++)
+- Instructions are step by step, node by node, beginner friendly
+- Working solutions are logged here for reference
+- No bug fixes mid-session — all fixes held until all code has been shared
+- Current code is a first vertical slice (prototype/testing phase, not final)
+ 
+---
+ 
+## Project Folder Structure
+ 
+```
+MyGame/
+├── CombatSystem/
+│   ├── AI/
+│   │   ├── Core
+│   │   ├── Enemies
+│   │   ├── Services
+│   │   └── Task
+│   ├── Animations/
+│   │   ├── AnimSequences
+│   │   ├── Montages
+│   │   └── Notifies
+│   ├── Core/
+│   │   ├── BluePrints
+│   │   ├── Components
+│   │   └── Interfaces
+│   ├── Data/
+│   │   ├── DataTables
+│   │   ├── Enums
+│   │   └── Structures
+│   ├── UI/
+│   │   └── Inventory
+│   └── Weapons/
+└── DungeonSystem/
+    ├── Core/
+    │   ├── Doors
+    │   ├── Generator
+    │   ├── Rooms
+    │   └── Testing
+    ├── Data/
+    │   ├── DataTables
+    │   ├── Enums
+    │   └── Struts
+    ├── Injection/
+    └── Themes/
+        └── Theme_01_Stone
+```
+ 
+---
+ 
+## Solutions Log
+ 
+---
+ 
+### AIC_EnemyBase (AI Controller)
+**Parent Class:** AIController
+**Location:** CombatSystem/AI/Core
+ 
+#### Class Defaults
+- Behavior Tree Asset: BT_F... (assigned)
+- Blackboard Asset: BB_EnemyBase
+- Net Cull Distance Squared: 225000000.0
+- Net Update Frequency: 100.0
+- Min Net Update Frequency: 2.0
+- Net Priority: 1.0
+- Set Control Rotation from Pawn Orientation: true
+- Stop AI Logic on Unpossess: true
+ 
+#### Components
+- Blackboard Component
+- Path Following Component
+ 
+#### Variables
+- BlackboardComponent
+- BehaviorTreeAsset
+- BlackboardAsset
+ 
+---
+ 
+#### Event BeginPlay
+1. **Event BeginPlay** → **Use Blackboard** (Target: self/AIController)
+   - Blackboard Asset: BB_EnemyBase
+   - Output: Blackboard Component →
+2. → **Branch**
+   - Condition: (Return Value from Use Blackboard)
+   - True → **Run Behavior Tree** (Target: self/AIController)
+     - BT Asset: Behavior Tree Asset variable
+   - False → (nothing)
+ 
+---
+ 
+#### Event On Possess
+1. **Event On Possess**
+   - Possessed Pawn →
+2. → **Cast To BP_EnemyBase**
+   - Object: Possessed Pawn
+   - Cast Failed → (nothing)
+   - As BP Enemy Base →
+3. → **Get Component by Class** (Target: Actor)
+   - Target: As BP Enemy Base
+   - Component Class: PawnSensingComponent
+   - Return Value →
+4. → **Bind Event to On See Pawn**
+   - Target: Return Value (PawnSensing component)
+   - Event: OnPawnDetected (custom event)
+ 
+---
+ 
+#### OnPawnDetected (Custom Event)
+1. **OnPawnDetected** (Custom Event)
+   - Pawn (input pin) →
+2. → **Cast To BP_ThirdPersonCharacter**
+   - Object: Pawn
+   - Cast Failed → (nothing)
+   - As BP Third Person Character →
+3. → **Set Value as Object** (Target: Blackboard Component)
+   - Target: Blackboard Component (self)
+   - Key Name: (key name pin)
+   - Object Value: As BP Third Person Character
+   - Target Actor: (ERROR — node purged/invalid connection)
+ 
+---
+ 
+### BB_EnemyBase (Blackboard)
+**Location:** CombatSystem/AI/Core
+**Parent:** None
+ 
+#### Keys
+| Key Name | Type |
+|---|---|
+| bHasTarget | Bool |
+| bIsAttacking | Bool |
+| TargetActor | Object |
+| SelfActor | Object |
+ 
+---
+ 
+### BT_EnemyBase (Behavior Tree)
+**Location:** CombatSystem/AI/Core
+**Blackboard:** BB_EnemyBase
+ 
+#### Tree Structure
+```
+ROOT (BB_EnemyBase)
+└── (empty — no tasks connected yet)
+```
+ 
+> First vertical slice — tree is set up with correct blackboard assigned but logic not built out yet.
+ 
+---
+ 
+### BP_EnemyBase (Character Blueprint)
+**Location:** CombatSystem/AI/Core
+**Parent Class:** Character
+ 
+#### Components
+- Capsule Component (CollisionCylinder)
+- Arrow Component
+- Mesh (CharacterMesh0)
+- BP_StatsComponent
+- Character Movement (CharMoveComp)
+- PawnSensing
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| AttackRange | Float |
+| AttackCooldown | Float |
+| bCanAttack | Boolean |
+| AttackDamage | Float |
+| AttackMontage | Anim Montage |
+ 
+#### Class Defaults
+- Attack Range: 200.0
+- Attack Cooldown: 2.0
+- Can Attack: true
+- Attack Damage: 20.0
+- Attack Montage: None
+- In Lifespan: 5.0
+- Animation Mode: Use Animation Blueprint
+- Anim Class: assigned
+ 
+---
+ 
+#### Event AnyDamage
+1. **Event AnyDamage**
+   - Outputs: Damage, Damage Type, Instigated By, Damage Causer
+2. Damage value → **Multiply (x 0.5)** → feeds into Damage Amount
+3. → **Apply Damage** (Target: BP_StatsComponent)
+   - Target: self (via Get Component by Class)
+   - Damage Info Damage Amount: (multiplied damage value)
+   - Damage Info Damage Type: Physical
+   - Damage Info Hit Location: 0.0, 0.0, 0.0
+   - Damage Info Hit Direction: 0.0, 0.0, 0.0
+   - Damage Info Can Be Blocked: (pin)
+4. → **Get Component by Class** (Target: Actor)
+   - Target: self
+   - Component Class: BP Stats Component
+ 
+---
+ 
+#### On Death (Event Dispatcher from BP_StatsComponent)
+1. **On Death** (BP_StatsComponent event dispatcher, bound)
+   - Killer pin (output)
+2. → **Set Movement Mode** (Target: Character Movement Component)
+   - New Movement Mode: None
+   - New Custom Mode: 0
+3. → **Set Simulate Physics** (Target: Primitive Component / Mesh)
+   - Simulate: true
+4. → **Set Collision Enabled** (Target: Capsule Component)
+   - New Type: No Collision
+5. → **Un Possess** (Target: Controller)
+   - Target: **Get Controller** (Target: self/Pawn)
+6. → **Set Life Span** (Target: self/Actor)
+   - In Lifespan: 5.0
+ 
+---
+ 
+### BTS_DetectPlayer (Behavior Tree Service)
+**Location:** CombatSystem/AI/Services
+**Parent Class:** BTService Blueprint Base
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| LoseTargetRange | Float |
+| TargetActor | Name |
+| bHasTarget | Name |
+| Key | Blackboard Key Selector |
+ 
+#### Class Defaults (Details panel)
+- LoseTargetRange: (value set)
+- TargetActor: (key name)
+- bHasTarget: (key name)
+- Key: (key name)
+- Service Interval: (set)
+- Random Deviation: (set)
+ 
+#### Event Graph
+1. **Event Receive Tick AI** — placed but no logic connected yet
+   - Available outputs: Owner Controller, Controlled Pawn, Delta Seconds
+ 
+> First vertical slice — service variables defined but tick logic not implemented yet.
+ 
+---
+ 
+### BTT_MeleeAttack (Behavior Tree Task)
+**Location:** CombatSystem/AI/Task
+**Parent Class:** BTTask Blueprint Base
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| MontageToPlay | Anim Montage |
+ 
+#### Class Defaults
+- Montage to Play: None (to be assigned)
+- Custom Description: (blank)
+- Node Name: (blank)
+- Tick Interval: (set)
+- Ignore Restart Self: false
+ 
+#### Event Graph
+1. **Event Receive Execute AI** — placed but no logic connected yet
+   - Available outputs: Owner Controller, Controlled Pawn
+ 
+> First vertical slice — task variable defined but execute logic not implemented yet.
+ 
+---
+ 
+### AnimSequences
+**Location:** CombatSystem/Animations/AnimSequences
+ 
+| Asset Name | Type | Notes |
+|---|---|---|
+| Anim_BL_ | Animation Sequence | Block |
+| Anim_CS_DODGE_B | Animation Sequence | Dodge Back |
+| Anim_CS_DODGE_F | Animation Sequence | Dodge Forward |
+| Anim_CS_DODGE_L | Animation Sequence | Dodge Left |
+| Anim_CS_DODGE_R | Animation Sequence | Dodge Right |
+| Anim_CS_KD_F | Animation Sequence | Knockdown Forward |
+| Anim_CSATLL_01 | Animation Sequence | Attack combo 1 |
+| Anim_CSATLL_02 | Animation Sequence | Attack combo 2 |
+| Anim_CSATLL_03 | Animation Sequence | Attack combo 3 |
+| Anim_CSATLL_04 | Animation Sequence | Attack combo 4 |
+| Anim_IN_TR_SAT_1 | Animation Sequence | Transition 1 |
+| Anim_IN_TR_SAT_2 | Animation Sequence | Transition 2 |
+| Anim_IN_TR_SAT_3 | Animation Sequence | Transition 3 |
+| RMB_out_MSA1 | Animation Sequence | RMB output |
+ 
+---
+ 
+### Montages
+**Location:** CombatSystem/Animations/Montages
+ 
+| Asset Name | Type | Notes |
+|---|---|---|
+| AM_Block | Animation Montage | Block |
+| AM_Dodge_B | Animation Montage | Dodge Back |
+| AM_Dodge_F | Animation Montage | Dodge Forward |
+| AM_Dodge_L | Animation Montage | Dodge Left |
+| AM_Dodge_R | Animation Montage | Dodge Right |
+| AM_Heavy Attack_1 | Animation Montage | Heavy Attack |
+| Anim_CS_KD_F_Montage | Animation Montage | Knockdown Forward |
+| Anim_CSATLL_01_Montage | Animation Montage | Attack combo 1 |
+| Anim_CSATLL_02_Montage | Animation Montage | Attack combo 2 |
+| Anim_CSATLL_03_Montage | Animation Montage | Attack combo 3 |
+| Anim_CSATLL_04_Montage | Animation Montage | Attack combo 4 |
+ 
+---
+ 
+### AN_ConsumeStamina (Anim Notify)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify
+ 
+#### Variables
+| Name | Type | Default |
+|---|---|---|
+| StaminaCost | Float | 10.0 |
+ 
+#### Class Defaults
+- Stamina Cost: 10.0
+- Notify Color: Pink/Red
+ 
+#### Received Notify
+1. **Received Notify**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Stats Component
+   - Return Value →
+4. **Consume Stamina** (Target: BP_Stats Component)
+   - Target: Return Value (BP Stats Component)
+   - Amount: StaminaCost variable
+   - Success →
+5. **Return Node**
+ 
+> Fully implemented. Fires mid-animation to deduct stamina from BP_StatsComponent.
+ 
+---
+ 
+### AN_DisableWeaponCollision (Anim Notify)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify
+ 
+#### Variables
+None
+ 
+#### Class Defaults
+- Notify Color: Pink/Red
+ 
+#### Received Notify
+1. **Received Notify**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Weapon Component
+   - Return Value →
+4. **Disable Weapon Collision** (Target: BP Weapon Component)
+   - Target: Return Value
+5. **Return Node**
+ 
+> Fully implemented. Fires mid-animation to turn off weapon hit detection on BP_WeaponComponent.
+ 
+---
+ 
+### AN_EnableWeaponCollision (Anim Notify)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify
+ 
+#### Variables
+None
+ 
+#### Class Defaults
+- Notify Color: Pink/Red
+ 
+#### Received Notify
+1. **Received Notify**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Weapon Component
+   - Return Value →
+4. **Enable Weapon Collision** (Target: BP Weapon Component)
+   - Target: Return Value
+5. **Return Node**
+ 
+> Fully implemented. Exact mirror of AN_DisableWeaponCollision — turns weapon hit detection ON at the start of the active swing window.
+ 
+---
+ 
+### ANS_CancelWindow (Anim Notify State)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify State (ANS — has Begin, Tick, End)
+ 
+#### Variables
+None
+ 
+#### Class Defaults
+- Notify Color: Light Blue/Teal
+ 
+#### Received Notify Begin
+- (not shown — expected to SET bInCancelWindow = true on BP_CombatComponent)
+ 
+#### Received Notify Tick
+- (not shown)
+ 
+#### Received Notify End (shown)
+1. **Received Notify End**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Combat Component
+   - Return Value →
+4. **SET**
+   - In Cancel Window: false (unchecked)
+   - Target: Return Value (BP Combat Component)
+5. **Return Node**
+ 
+> Fully implemented (End shown). Controls the combo cancel window — sets `bInCancelWindow` on BP_CombatComponent. Begin opens the window, End closes it.
+ 
+---
+ 
+### ANS_ComboWindow (Anim Notify State)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify State (ANS — has Begin, Tick, End)
+ 
+#### Variables
+None
+ 
+#### Class Defaults
+- Notify Color: Light Blue (lighter than ANS_CancelWindow)
+ 
+#### Received Notify Begin
+- (not shown — expected to SET bInComboWindow = true on BP_CombatComponent)
+ 
+#### Received Notify Tick
+- (not shown)
+ 
+#### Received Notify End (shown)
+1. **Received Notify End**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Combat Component
+   - Return Value →
+4. **Is Valid**
+   - Object: Return Value (BP Combat Component)
+   - Return Value (bool) →
+5. **Branch**
+   - Condition: Is Valid result
+   - False → **Return Node** (early exit)
+   - True →
+6. **SET** (on BP Combat Component)
+   - In Combo Window: false
+   - Target: BP Combat Component
+7. **Call On Combo Window Closed** (event dispatcher on BP_CombatComponent)
+   - Target: BP Combat Component
+8. **Return Node**
+ 
+> More robust than ANS_CancelWindow — validates component before acting, sets `bInComboWindow = false`, then fires `OnComboWindowClosed` event dispatcher on BP_CombatComponent.
+ 
+---
+ 
+### ANS_IFrames (Anim Notify State)
+**Location:** CombatSystem/Animations/Notifies
+**Parent Class:** Anim Notify State (ANS — Begin and End only, no Tick)
+ 
+#### Variables
+None
+ 
+#### Class Defaults
+- Notify Color: Light Blue/Teal
+ 
+#### Received Notify Begin
+- (not shown — expected to call Enable IFrames on BP_CombatComponent)
+ 
+#### Received Notify End (shown)
+1. **Received Notify End**
+   - Outputs: Mesh Comp, Animation, Event Reference
+2. **Get Owner** (Target: Actor Component)
+   - Target: Mesh Comp
+   - Return Value →
+3. **Get Component by Class** (Target: Actor)
+   - Target: Return Value (from Get Owner)
+   - Component Class: BP Combat Component
+   - Return Value →
+4. **Disable IFrames** (Target: BP Combat Component)
+   - Target: Return Value
+5. **Return Node**
+ 
+> Fully implemented (End shown). Controls invincibility frames — Begin enables IFrames, End disables them. Used on dodge animations to grant temporary invincibility through the active dodge window.
+ 
+---
+ 
+### CS_HitImpact (Camera Shake)
+**Location:** CombatSystem/Core/BluePrints
+**Parent Class:** Camera Shake Base
+**Pattern:** Wave Oscillator Camera Shake
+**Single Instance:** false
+ 
+#### Settings
+| Axis | Amplitude | Frequency | Initial Offset Type |
+|---|---|---|---|
+| Pitch | 1.0 | 25.0 | Random |
+| Yaw | 1.0 | 25.0 | Random |
+| Roll | 0.5 | 25.0 | Random |
+ 
+- Rotation Amplitude Multiplier: 0.0
+- Rotation Frequency Multiplier: 1.0
+ 
+#### Timing
+| Setting | Value |
+|---|---|
+| Duration | 0.2 |
+| Blend In Time | 0.05 |
+| Blend Out Time | 0.1 |
+ 
+> Data-only blueprint — no event graph logic. Short sharp shake (0.2s) on hit impact with random pitch/yaw for organic feel.
+ 
+---
+ 
+### BP_CombatComponent (Actor Component)
+**Location:** CombatSystem/Core/Components
+ 
+#### Functions (24 total, 3 overridable)
+| Function |
+|---|
+| InitializeCombat |
+| TryExecuteAttack |
+| CanExecuteAttack |
+| GetNextAttackData |
+| ExecuteAttack |
+| AddToInputBuffer |
+| ProcessInputBuffer |
+| CleanInputBuffer |
+| ResetAttackState |
+| TryExecuteDodge |
+| ExecuteDodge |
+| EnableIFrames |
+| DisableIFrames |
+| StartBlocking |
+| StopBlocking |
+| HandleBlockedAttack |
+| SetCombatState |
+| GetCombatState |
+| CanTakeDamage |
+| InterruptAction |
+| RecoverFromStagger |
+| ResetCombo |
+| CanInterruptAttack |
+| InterruptAttack |
+ 
+#### Variables
+ 
+**State**
+| Name | Type |
+|---|---|
+| CurrentCombatState | E Combat State (Enum) |
+| bCanAttack | Boolean |
+| bIsBlocking | Boolean |
+| bIsInvulnerable | Boolean |
+| CurrentComboIndex | Integer |
+| LastAttackTime | Float |
+| LastExecutedComboIndex | Integer |
+ 
+**Input**
+| Name | Type |
+|---|---|
+| InputBuffer | S Input Buffer (Struct) |
+| MaxBufferSize | Integer (public) |
+| BufferTimeWindow | Float (public) |
+ 
+**Attack**
+| Name | Type |
+|---|---|
+| CurrentAttackData | S Attack Data (Struct) |
+| bInComboWindow | Boolean |
+| bInCancelWindow | Boolean |
+| ActiveAttackMontage | Anim Montage |
+| ComboResetTimerHandle | Timer Handle |
+ 
+**Dodge**
+| Name | Type |
+|---|---|
+| DefaultDodgeData | S Dodge Data (public) |
+| bIsDodging | Boolean |
+ 
+**Reference**
+| Name | Type |
+|---|---|
+| OwnerCharacter | Character |
+| AnimInstance | Anim Instance |
+| StatsComponent | BP Stats Component |
+| WeaponComponent | BP Weapon Component |
+ 
+#### Event Dispatchers
+- OnCombatStateChanged
+- OnAttackStarted
+- OnAttackEnded
+- OnComboWindowOpened
+- OnComboWindowClosed
+ 
+---
+ 
+#### HandlePoiseBroken (Custom Event)
+1. **HandlePoiseBroken** (Custom Event)
+   - Output: Attack Direction
+2. **Interrupt Action** (Target: BP Combat Component)
+   - Target: self
+   - Force: true
+   - Output: Interrupted →
+3. **Set Combat State** (Target: BP Combat Component)
+   - Target: self
+   - New State: Staggered
+4. **CLEAR** (Input Buffer array)
+5. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "RecoverFromStagger"
+   - Time: 2.0
+   - Looping: false
+   - Max Once Per Frame: false
+ 
+---
+ 
+#### OnMontageEnded (Custom Event)
+1. **OnMontageEnded** (Custom Event)
+   - Outputs: Montage, Interrupted
+2. **Branch**
+   - Condition: Montage == ActiveAttackMontage
+   - False → exit
+   - True →
+3. **Reset Attack State** (Target: self)
+4. **Clear and Invalidate Timer by Handle**
+   - Handle: ComboResetTimerHandle
+5. **Branch**
+   - Condition: InputBuffer != empty
+   - True → **Process Input Buffer** (Target: self)
+   - False → exit
+ 
+---
+ 
+#### OnMontageBlendingOut (Custom Event)
+1. **OnMontageBlendingOut** (Custom Event)
+   - Outputs: Montage, Interrupted
+2. **Branch**
+   - Condition: Montage == ActiveAttackMontage
+   - False → exit
+   - True →
+3. **Call On Attack Ended** (event dispatcher)
+   - Target: self
+   - Attack Data: CurrentAttackData
+4. **SET**
+   - In Combo Window: false
+ 
+---
+ 
+#### OnDodgeEnded (Custom Event)
+1. **OnDodgeEnded** (Custom Event)
+   - Outputs: Montage, Interrupted
+   - DefaultDodgeData struct fields visible: DodgeMontage, StaminaCost, IFrameStart, IFrameEnd, DodgeDistance, RecoveryTime
+2. **Branch**
+   - Condition: Montage == DefaultDodgeData.DodgeMontage
+   - False → exit
+   - True →
+3. **SET**
+   - Is Dodging: false
+4. **Disable IFrames** (Target: self)
+5. **Set Combat State** (Target: self)
+   - New State: Idle
+ 
+---
+ 
+#### InitializeCombat (Function)
+ 
+**Part 1 — Cache References**
+1. **InitializeCombat** (entry)
+2. **Get Owner** (Target: self/Actor Component) → Return Value →
+3. **Cast To Character**
+   - Cast Failed → **Return Node** (Success: false)
+   - As Character →
+4. **SET** — OwnerCharacter: As Character
+5. **Get Component by Class** (Target: OwnerCharacter)
+   - Component Class: BP Stats Component → Return Value →
+6. **SET** — StatsComponent: Return Value
+7. **Get Component by Class** (Target: OwnerCharacter)
+   - Component Class: BP Weapon Component → Return Value →
+8. **SET** — WeaponComponent: Return Value
+9. **Get Anim Instance** (Target: OwnerCharacter Mesh) → Return Value →
+10. **SET** — AnimInstance: Return Value
+11. → **Branch** (Is Valid: AnimInstance) — continues in Part 2
+ 
+**Part 2 — Bind Events & Finalize**
+1. **Branch** (Is Valid: AnimInstance)
+   - False → **Print String** "AnimInstance not found!" (Dev Only) → **Return Node** (Success: false)
+   - True → **Do Once** (Start Closed: false)
+2. **Bind Event to On Montage Ended** (Target: AnimInstance)
+   - Event: Create Event (self, OnDodgeEnded(Montage, bInterrupted))
+3. **Bind Event to On Montage Blending Out** (Target: AnimInstance)
+   - Event: Create Event (self, OnMontageBlendingOut(Montage, bInterrupted))
+4. **Set Combat State** (Target: self)
+   - New State: Idle
+5. **SET** — Can Attack: true
+6. **Return Node** (Success: true)
+ 
+---
+ 
+#### HandleStaminaDepleted (Custom Event)
+1. **HandleStaminaDepleted** (Custom Event)
+2. **Print String**
+   - In String: "Stamina Depleted!"
+   - Development Only: true
+ 
+> Placeholder only — stamina depletion logic not yet implemented.
+ 
+---
+ 
+#### TryExecuteAttack (Function)
+**Input:** Attack Type
+**Output:** Success (bool)
+ 
+**Part 1 — Can Execute Check & Get Attack Data**
+1. **TryExecuteAttack** (entry) — Input: Attack Type
+2. **Can Execute Attack** (Target: self) → Can Execute →
+3. **Branch** (Condition: Can Execute)
+   - False → **Add to Input Buffer** (Target: self, Attack Type) → **Return Node** (Success: false)
+   - True →
+4. **Get Next Attack Data** (Target: self)
+   - Attack Type: Attack Type input
+   - Current Index: CurrentComboIndex
+   - Output: Attack Data →
+5. **SET** — CurrentAttackData: Attack Data
+6. **Is Valid** (Attack Data) →
+7. **Branch** (Condition: Is Valid)
+   - False → **Print String** "No valid attack data found" (Dev Only) → **Return Node** (Success: false)
+   - True →
+ 
+S_AttackData fields exposed at this stage:
+- AttackName, AttackType, AttackMontage, Damage, PoiseDamage
+- StaminaCost (green wire → stamina check below)
+- ComboIndex, NextComboAttackIndex
+- ComboWindowStart, ComboWindowEnd
+- CanBeCanceled, CancelWindowStart, CancelWindowEnd
+- MovementSpeedMultiplier, RotationSpeedMultiplier
+ 
+8. **Is Valid** (StatsComponent) →
+9. **Branch** (Condition: Is Valid)
+   - False → **Print String** "StatsComponent invalid (InitializeCombat failed)" (Dev Only) → **Return Node** (Success: false)
+   - True →
+ 
+**Part 2 — Stamina Check & Execute**
+1. **Has Stamina** (Target: StatsComponent)
+   - Amount: AttackData.StaminaCost
+   - Has Enough →
+2. **Branch** (Condition: Has Enough)
+   - False → **Print String** "Not enough stamina" (Dev Only) → **Return Node** (Success: false)
+   - True →
+3. **Consume Stamina** (Target: StatsComponent)
+   - Amount: AttackData.StaminaCost
+   - Success →
+4. **Branch** (Condition: Success)
+   - False → **Print String** "ConsumeStamina failed" (Dev Only) → **Return Node** (Success: false)
+   - True →
+5. **Execute Attack** (Target: self)
+   - Attack Data: CurrentAttackData
+   - Success →
+6. **Return Node** (Success: true)
+ 
+---
+ 
+#### CanExecuteAttack (Function)
+**Output:** Can Execute (bool)
+ 
+**Gate 1 — Block invalid states**
+- CurrentCombatState == Staggered →
+- CurrentCombatState == Dead →
+- Both feed into **OR**
+- **Branch** (Condition: OR result)
+  - True (is Staggered or Dead) → **Return Node** (Can Execute: false)
+  - False →
+ 
+**Gate 2 — Require valid attack state**
+- CurrentCombatState == Idle → (condition A)
+- CurrentCombatState == Attacking AND bInComboWindow → **AND** → (condition B)
+- Condition A or B feeds into **Branch**
+  - False (not Idle, not in combo window) → **Return Node** (Can Execute: false)
+  - True →
+ 
+**Gate 3 — Further state checks**
+- **Branch**
+  - True → **Return Node** (Can Execute: true)
+  - False →
+- **Branch** (Condition: Is Blocking)
+  - True → **Return Node** (Can Execute: true)
+  - False → **Return Node** (Can Execute: false)
+ 
+**Summary of rules:**
+| State | Result |
+|---|---|
+| Staggered or Dead | false — always blocked |
+| Idle | true — can attack |
+| Attacking + InComboWindow | true — combo chain allowed |
+| Blocking | true — can interrupt block with attack |
+| Attacking, no combo window | false — must wait |
+ 
+---
+ 
+#### GetNextAttackData (Function)
+**Inputs:** Attack Type, Current Index
+**Output:** Attack Data (S_AttackData)
+ 
+**Part 1 — Get Weapon Data & Select Attack Array**
+1. **GetNextAttackData** (entry)
+2. **GET Current Weapon Data** (Target: WeaponComponent)
+   - Output: Weapon Data →
+3. **SET** — Weapon Data (cached locally)
+4. S_WeaponData struct fields exposed:
+   - WeaponID, WeaponName, WeaponClass, WeaponMesh, SocketName
+   - LightAttack (array) →
+   - HeavyAttack (array) →
+   - BlockPercentage, StaminaCostPerBlock, WeaponWeight
+5. **Switch on E_AttackType** (Selection: Attack Type input)
+   - Light → **SET** Attack Array: WeaponData.LightAttack
+   - Heavy → **SET** Attack Array: WeaponData.HeavyAttack
+   - Charged / Special / Dodge → (not shown)
+6. **Branch** (Condition: LENGTH(Attack Array) > 0)
+   - False → **Return Node** (Attack Data: empty)
+   - True → **Sequence** (Then 0, Then 1)
+ 
+**Part 2 — Validate Index & Return Data**
+1. **Sequence → Then 0 → Branch**
+   - Condition: LENGTH(Attack Array) == 0
+   - True → **Return Node** (Attack Data: empty)
+   - False →
+2. **Branch** (Condition: CurrentIndex < LENGTH(Attack Array))
+   - True → **Return Node**
+     - Attack Data: GET Attack Array[CurrentIndex]
+   - False → **Return Node**
+     - Attack Data: GET Attack Array[0] ← wraps back to first attack
+ 
+**Summary:**
+- Fetches the correct attack array (Light or Heavy) from the equipped weapon
+- Validates the array is not empty
+- Returns Attack Array[CurrentIndex] if valid, else wraps to index 0
+ 
+---
+ 
+#### ExecuteAttack (Function)
+**Input:** Attack Data (S_AttackData)
+**Output:** Success (bool)
+ 
+**Part 1 — Validate**
+1. **ExecuteAttack** (entry) — Input: Attack Data
+2. **SET** — LastExecutedComboIndex: Attack Data (combo index)
+3. **Is Valid** (AnimInstance) AND **Is Valid** (Attack Data.AttackMontage) → **AND**
+4. **Branch** (Condition: AND result)
+   - False → **Return Node** (Success: false)
+   - True →
+5. **Branch** (Is Valid: AttackMontage)
+   - False → **Return Node** (Success: false)
+   - True → **Sequence** (Then 0, Then 1)
+ 
+**Part 2 — Stop Previous & Update State**
+1. **Montage Stop** (Target: AnimInstance)
+   - In Blend Out Time: 0.2
+   - Montage: ActiveAttackMontage
+2. **SET** — CurrentAttackData: Attack Data
+3. **SET** — ActiveAttackMontage: AttackData.AttackMontage
+4. **Branch** (Condition: NextComboAttackIndex == -1)
+   - True → **SET** CurrentComboIndex: 0
+   - False → **SET** CurrentComboIndex: NextComboAttackIndex
+5. **Sequence** (Then 0, Then 1)
+6. **Clear and Invalidate Timer by Handle**
+   - Handle: ComboResetTimerHandle
+ 
+**Part 3 — Play Montage & Set State**
+1. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "ResetCombo"
+   - Time: 1.5
+   - Looping: false
+   - Return Value →
+2. **SET** — ComboResetTimerHandle: Return Value
+3. **Set Combat State** (Target: self)
+   - New State: Attacking
+4. **Montage Play** (Target: AnimInstance)
+   - Montage to Play: AttackData.AttackMontage
+   - In Play Rate: 1.0
+   - Return Value Type: Montage Length
+   - In Time to Start Montage At: 0.0
+   - Stop All Montages: true
+5. **SET** Max Walk Speed (Target: CharacterMovement)
+   - Value: AttackData.MovementSpeedMultiplier × 600.0
+6. **Call On Attack Started** (event dispatcher)
+   - Target: self
+   - Attack Data: Attack Data
+ 
+**Part 4 — Finalize**
+1. **SET** — Can Attack: false
+2. **SET** — In Combo Window: false
+3. **SET** — In Cancel Window: false
+4. **SET** — Last Attack Time: Get Game Time in Seconds
+5. **Return Node** (Success: true)
+ 
+---
+ 
+#### AddToInputBuffer (Function)
+**Input:** Attack Type
+ 
+1. **AddToInputBuffer** (entry) — Input: Attack Type
+2. **LENGTH** (Input Buffer array)
+3. **>=** (LENGTH >= MaxBufferSize)
+4. **Branch** (Condition: LENGTH >= MaxBufferSize)
+   - True → **Return Node** (buffer full, discard input)
+   - False →
+5. **ADD** (to Input Buffer array)
+   - Item: **Make S_InputBufferEntry**
+     - Attack Type: Attack Type input
+     - Time Stamp: Get Game Time in Seconds
+     - Processed: false
+ 
+**S_InputBufferEntry struct fields revealed:**
+- Attack Type (E_AttackType enum)
+- Time Stamp (Float)
+- Processed (Bool)
+ 
+---
+ 
+#### ProcessInputBuffer (Function)
+ 
+1. **ProcessInputBuffer** (entry)
+2. **IS VALID INDEX** (Input Buffer array, Index)
+3. **Branch** (Condition: IS VALID INDEX)
+   - False → exit (nothing to process)
+   - True →
+4. **GET** (Input Buffer[Index])
+   - Input Buffer array, Index →
+   - Output: Buffered Entry (S_InputBufferEntry) →
+5. **SET** — break out Buffered Entry struct fields:
+   - Attack Type
+   - Time Stamp
+   - Processed (red pin)
+6. **SET** — Executed: (result of processing — likely TryExecuteAttack)
+   - Exposes: BufferedEntry AttackType, BufferedEntry TimeStamp, BufferedEntry Processed
+7. **Branch** (Condition: Executed / Processed)
+   - True → **REMOVE INDEX** (Input Buffer, Index) → (continues off screen)
+   - False → **REMOVE INDEX** (Input Buffer, Index) — entry removed regardless
+ 
+> Both paths remove the entry from the buffer — True = successfully executed and removed, False = could not execute (likely expired or invalid) and still removed to prevent blocking the queue.
+ 
+---
+ 
+#### CleanInputBuffer (Function)
+ 
+1. **CleanInputBuffer** (entry)
+2. **Get Game Time in Seconds** → Return Value →
+3. **SET** — Current Time: Return Value
+4. **For Each Loop**
+   - Array: Input Buffer
+   - Loop Body →
+   - Array Element: S_InputBufferEntry
+   - Array Index →
+5. **Break S_InputBufferEntry**
+   - Outputs: Attack Type, Time Stamp, Processed
+6. **SET** — Entry Age: (Current Time - Time Stamp)
+7. **Branch** (Condition: Entry Age > BufferTimeWindow)
+   - True → **REMOVE** (Input Buffer at current Array Index)
+   - False → (continue loop, keep entry)
+ 
+> Iterates every entry in the buffer, calculates its age, and removes any that are older than BufferTimeWindow. Keeps the buffer from filling up with stale unprocessed inputs.
+ 
+---
+ 
+#### ResetAttackState (Function)
+ 
+1. **ResetAttackState** (entry)
+2. **SET** — Active Attack Montage: None (cleared)
+3. **SET** — Current Combo Index: 0
+4. **SET** — Can Attack: true
+5. **SET** — In Combo Window: false
+6. **SET** — In Cancel Window: false
+7. **SET** — Max Walk Speed: 600.0 (Target: CharacterMovement from OwnerCharacter)
+8. **Set Combat State** (Target: self)
+   - New State: Idle
+ 
+> Full attack state teardown — mirrors the values set during ExecuteAttack and returns everything to clean defaults.
+ 
+---
+ 
+#### TryExecuteDodge (Function)
+**Input:** Direction (Vector)
+**Output:** Success (bool)
+ 
+**Gate 1 — Block invalid states**
+- CurrentCombatState == Dead →
+- CurrentCombatState == Staggered →
+- Both → **OR**
+- **Is Falling** (Target: CharacterMovement from OwnerCharacter) →
+- OR + Is Falling → **Branch**
+  - True → **Return Node** (Success: false)
+  - False →
+ 
+**Gate 2 — Block if already dodging**
+- **Branch** (Condition: bIsDodging)
+  - True → **Return Node** (Success: false)
+  - False →
+ 
+**Gate 3 — Block attacking outside cancel window**
+- (CurrentCombatState == Attacking) AND (NOT bInCancelWindow) → **AND**
+- **Branch** (Condition: AND result)
+  - True → **Return Node** (Success: false)
+  - False →
+ 
+DefaultDodgeData struct fields exposed:
+- DodgeMontage, StaminaCost, IFrameStart, IFrameEnd, DodgeDistance, RecoveryTime
+ 
+**Stamina Check & Execute**
+1. **Has Stamina** (Target: StatsComponent)
+   - Amount: DefaultDodgeData.StaminaCost
+   - Has Enough →
+2. **Branch** (Condition: Has Enough)
+   - False → **Return Node** (Success: false)
+   - True →
+3. **Consume Stamina** (Target: StatsComponent)
+   - Amount: DefaultDodgeData.StaminaCost
+   - Success →
+4. **Execute Dodge** (Target: self)
+   - Direction: Direction input
+   - Success →
+5. **Return Node** (Success: true)
+ 
+**Summary of dodge rules:**
+| Condition | Result |
+|---|---|
+| Dead, Staggered, or Falling | false |
+| Already dodging | false |
+| Attacking outside cancel window | false |
+| Not enough stamina | false |
+| All checks pass | Execute Dodge |
+ 
+---
+ 
+#### ExecuteDodge (Function)
+**Input:** Direction (Vector)
+**Output:** Success (bool)
+ 
+**Part 1 — Resolve Dodge Direction**
+1. **ExecuteDodge** (entry) — Input: Direction
+2. **Get Owner** (self) → **Cast To BP_ThirdPersonCharacter**
+   - Cast Failed → (yellow wire fallback, uses input Direction)
+   - As BP Third Person Character →
+3. **Get Last Input Vector** (Target: CharacterMovement from OwnerCharacter)
+   - Return Value →
+4. **Vector Length** (A: Last Input Vector) → Return Value →
+5. **Branch** (Condition: Vector Length > 0.1)
+   - False → fallback to Direction input
+   - True →
+6. **Normalize** (A: Last Input Vector, Tolerance: 0.0001) → Return Value →
+7. **SET** — Dodge Direction: Normalized direction
+8. **Make Rot from X** (X: Dodge Direction) → Return Value →
+9. **Set Actor Rotation** (Target: OwnerCharacter)
+   - New Rotation: Make Rot from X result
+   - Teleport Physics: false
+ 
+**Part 2 — Validate & Stop Current Montage**
+1. **Is Valid** (DefaultDodgeData.DodgeMontage) →
+2. **Branch** (Condition: Is Valid)
+   - False → **Return Node** (Success: false)
+   - True →
+3. **Is Valid** (ActiveAttackMontage) →
+4. **Branch** (Condition: Is Valid)
+   - True → **Montage Stop** (Target: AnimInstance, Blend Out: 0.1, Montage: ActiveAttackMontage)
+   - False → skip
+5. **Reset Attack State** (Target: self)
+6. **SET** — Is Dodging: true
+7. **Set Combat State** (Target: self) — New State: Dodging
+ 
+**Part 3 — Play Montage, Launch & Set IFrame Timers**
+1. **Montage Play** (Target: AnimInstance)
+   - Montage to Play: DefaultDodgeData.DodgeMontage
+   - In Play Rate: 1.5
+   - Stop All Montages: true
+2. **Normalize** (Dodge Direction, Tolerance: 0.0001) →
+3. **Multiply** (Normalized Direction × DodgeDistance) →
+4. **Launch Character** (Target: OwnerCharacter)
+   - Launch Velocity: Normalized Direction × DodgeDistance
+   - XY Override: true
+   - Z Override: false
+5. **Set Timer by Function Name**
+   - Function Name: "EnableIFrames"
+   - Time: DefaultDodgeData.IFrameStart
+   - Looping: false
+6. **Set Timer by Function Name**
+   - Function Name: "DisableIFrames"
+   - Time: DefaultDodgeData.IFrameEnd
+   - Looping: false
+7. **Return Node** (Success: true)
+ 
+---
+ 
+#### EnableIFrames (Function)
+ 
+1. **EnableIFrames** (entry)
+2. **SET** — Is Invulnerable: true
+3. **Print String** "I-Frames Active" (Development Only)
+ 
+---
+ 
+#### DisableIFrames (Function)
+ 
+1. **DisableIFrames** (entry)
+2. **SET** — Is Invulnerable: false
+3. **Print String** "I-Frames Ended" (Development Only)
+ 
+---
+ 
+#### StartBlocking (Function)
+**Output:** Success (bool)
+ 
+**Part 1 — Gate Checks**
+1. **StartBlocking** (entry)
+2. CurrentCombatState == Dead →
+3. CurrentCombatState == Staggered →
+4. Both → **OR**
+5. **Branch 1** (Condition: Dead OR Staggered)
+   - True → **Return Node** (Success: false)
+   - False →
+6. **Branch 2** (Condition: CurrentCombatState == Attacking)
+   - True → **Return Node** (Success: false)
+   - False →
+7. **Branch 3** (Condition: CurrentCombatState == Dodging)
+   - True → **Interrupt Action** (Target: self, Force: false) → continues or returns (ambiguous from view)
+   - False →
+ 
+**Part 2 — Set Blocking State**
+1. **Return Node** (Success: false) — from failed dodge-interrupt path
+2. **SET** — Is Blocking: true
+3. **SET** — Max Walk Speed: 150.0 (Target: CharacterMovement from OwnerCharacter)
+4. **Clear and Invalidate Timer by Handle**
+   - Handle: ComboResetTimerHandle
+5. **Set Combat State** (Target: self) — New State: Blocking
+6. **Cast To BP_ThirdPersonCharacter** (Object: OwnerCharacter)
+   - As BP Third Person Character → Mesh →
+7. **Get Anim Instance** (Target: Skeletal Mesh Component) →
+ 
+**Part 3 — Play Block Montage**
+1. **Montage Play** (Target: AnimInstance)
+   - Montage to Play: AM_Block
+   - In Play Rate: 1.0
+   - Return Value Type: Montage Length
+   - In Time to Start Montage At: 0.0
+   - Stop All Montages: true
+2. **Return Node** (Success: true)
+ 
+> Slows walk speed to 150 while blocking (vs 600 normal). Clears combo timer. Plays AM_Block montage.
+ 
+---
+ 
+#### StopBlocking (Function)
+ 
+**Part 1 — State Check & Reset Speed**
+1. **StopBlocking** (entry)
+2. **SET** — Is Blocking: false
+3. CurrentCombatState == Blocking →
+4. **Branch** (Condition: CurrentCombatState == Blocking)
+   - False → exit (not currently blocking, nothing to do)
+   - True →
+5. **SET** — Max Walk Speed: 600.0 (Target: CharacterMovement from OwnerCharacter)
+6. **Cast To BP_ThirdPersonCharacter** (Object: OwnerCharacter)
+   - As BP Third Person Character → Mesh →
+7. **Get Anim Instance** (Target: Skeletal Mesh Component) → Return Value →
+ 
+**Part 2 — Stop Montage & Trigger Stamina Regen**
+1. **Montage Stop** (Target: AnimInstance)
+   - In Blend Out Time: 0.2
+   - Montage: None (stops current active montage)
+2. **Set Combat State** (Target: self) — New State: Idle
+3. **Set Timer by Function Name**
+   - Object: StatsComponent
+   - Function Name: "StartStaminaRegeneration"
+   - Time: StatsComponent.BaseStatStaminaRegenDelay
+   - Looping: false
+ 
+**BP_StatsComponent base stat fields revealed:**
+- BaseStatMaxHealth
+- BaseStatMaxStamina
+- BaseStatStaminaRegenRate
+- BaseStatStaminaRegenDelay ← used here as regen timer delay
+- BaseStatPoiseRegenRate
+- BaseStatPoiseRegenDelay (note: visible as "Posie" — possible typo)
+- BaseStatMaxPoise
+ 
+---
+ 
+#### HandleBlockedAttack (Function)
+**Input:** Damage Info (S_DamageInfo)
+**Output:** Block Damage (float)
+ 
+**Part 1 — Calculate Block & Remaining Damage**
+1. **HandleBlockedAttack** (entry) — Input: Damage Info
+2. **Get Current Weapon Data** (Target: WeaponComponent) → Weapon Data →
+3. **SET** — Weapon Data (cached locally)
+4. S_WeaponData fields used:
+   - BlockPercentage (green wire → Block Multiplier calc)
+   - StaminaCostPerBlock (green wire → Stamina Cost calc)
+5. **SET** — Block Multiplier: f(WeaponData.BlockPercentage)
+6. **SET** — Block Amount: DamageInfo.DamageAmount × Block Multiplier
+7. **SET** — Remaining Damage: DamageInfo.DamageAmount − Block Amount
+8. **SET** — Stamina Cost: f(StaminaCostPerBlock + Block Amount × 0.5)
+ 
+S_DamageInfo fields from input:
+- DamageAmount, DamageType, PoiseDamage, Instigator, HitLocation, HitDirection, CanBeBlocked
+ 
+**Part 2 — Consume Stamina & Apply Remaining Damage**
+1. **Consume Stamina** (Target: StatsComponent)
+   - Amount: Stamina Cost
+   - Success →
+2. **Branch** (Condition: StatsComponent.CurrentStamina <= 0.0)
+   - True → **Stop Blocking** (Target: self) → **Return Node** (Block Damage: 0.0)
+   - False →
+3. **Make S_DamageInfo**
+   - Damage Amount: Remaining Damage
+   - Damage Type: DamageInfo.DamageType
+   - Poise Damage: DamageInfo.PoiseDamage
+   - Instigator: DamageInfo.Instigator
+   - Hit Location: DamageInfo.HitLocation
+   - Hit Direction: DamageInfo.HitDirection
+   - Can Be Blocked: DamageInfo.CanBeBlocked
+4. **Apply Damage** (Target: StatsComponent)
+   - Damage Info: Make S_DamageInfo output
+5. **Return Node** (Block Damage: Block Amount)
+ 
+> Partial blocking — weapon's BlockPercentage determines how much damage is absorbed. Stamina is consumed per block. If stamina hits 0, guard is broken and blocking stops automatically.
+ 
+---
+ 
+#### SetCombatState (Function)
+**Input:** New State (E_Combat State)
+ 
+1. **SetCombatState** (entry) — Input: New State
+2. **Branch**
+   - Condition: CurrentCombatState == New State
+   - True → **Print String** "State already set to this value - skipping" (Development Only) → exit
+   - False →
+3. **SET** — Old State: CurrentCombatState
+4. **SET** — Current Combat State: New State
+5. **Call On Combat State Changed** (event dispatcher)
+   - Target: self
+   - New State: New State
+   - Old State: Old State
+ 
+> Guards against redundant state changes. Caches the previous state as Old State before overwriting, then fires the OnCombatStateChanged dispatcher so other systems can react to the transition.
+ 
+---
+ 
+#### GetCombatState (Function)
+**Output:** State (E_Combat State)
+ 
+1. **GetCombatState** (entry)
+2. **Return Node**
+   - State: CurrentCombatState
+ 
+> Simple getter — returns CurrentCombatState directly. No logic, no guards.
+ 
+---
+ 
+#### CanTakeDamage (Function)
+**Output:** Can Take (bool)
+ 
+1. **CanTakeDamage** (entry)
+2. **Is Invulnerable** (bIsInvulnerable variable) →
+3. **CurrentCombatState == Dead** →
+4. Both → **OR**
+5. **Branch** (Condition: OR result)
+   - True (invulnerable OR dead) → **Return Node** (Can Take: false)
+   - False → **Return Node** (Can Take: true)
+ 
+**Summary:**
+| Condition | Result |
+|---|---|
+| bIsInvulnerable = true | false — no damage taken |
+| CurrentCombatState == Dead | false — already dead |
+| Neither | true — damage applies |
+ 
+> Two-condition gate. IFrames (during dodge) and the Dead state both block damage intake.
+ 
+---
+ 
+#### InterruptAction (Function)
+**Input:** Force (bool)
+**Output:** Interrupted (bool)
+ 
+**Gate 1 — Block uninterruptible attack**
+1. **InterruptAction** (entry) — Input: Force
+2. CurrentCombatState == Attacking →
+3. bInCancelWindow != [bool] (NOT bInCancelWindow) →
+4. Both → **AND**
+5. **Branch 1** (Condition: IsAttacking AND NOT InCancelWindow)
+   - False → proceed (state allows interruption)
+   - True → **Branch 2** (Condition: Force)
+     - False (not forced) → **Return Node** (Interrupted: false) — blocked
+     - True (forced) → proceed (Force bypasses the gate)
+ 
+**Execute — Stop montage if active**
+1. **Is Valid** (Active Attack Montage) →
+2. **Branch 3** (Condition: Is Valid)
+   - False → skip to Sequence
+   - True → **Montage Stop** (Target: Anim Instance)
+     - In Blend Out Time: 0.1
+     - Montage: Active Attack Montage
+3. → **Sequence** (Then 0, Then 1)
+   - Then 0 → **Reset Attack State** (Target: self)
+   - Then 1 → **CLEAR** (Input Buffer array)
+4. **Return Node** (Interrupted: true)
+ 
+**Summary of interrupt rules:**
+| Condition | Result |
+|---|---|
+| Not attacking | true — interrupts cleanly |
+| Attacking, in cancel window | true — cancel window allows it |
+| Attacking, outside cancel window, Force = false | false — blocked |
+| Attacking, outside cancel window, Force = true | true — forced through |
+ 
+> Force=true is used by HandlePoiseBroken (stagger) to guarantee interruption regardless of state. Force=false (used by StartBlocking) respects the cancel window.
+ 
+---
+ 
+#### RecoverFromStagger (Function)
+ 
+1. **RecoverFromStagger** (entry)
+2. **Set Combat State** (Target: self)
+   - New State: Idle
+3. **Reset Attack State** (Target: self)
+ 
+> Called by timer set in HandlePoiseBroken (2.0s delay). Clears the Staggered state and resets all attack variables back to defaults.
+ 
+---
+ 
+#### ResetCombo (Function)
+ 
+1. **ResetCombo** (entry)
+2. **SET** — Current Combo Index: 0
+3. **Branch** (Condition: CurrentCombatState != Blocking)
+   - False (is blocking) → exit — keep blocking state, don't override
+   - True (not blocking) →
+4. **Set Combat State** (Target: self)
+   - New State: Idle
+5. **Print String** "Combo Reset (Timeout)" (Development Only)
+ 
+> Called by timer (1.5s) set in ExecuteAttack when no follow-up attack arrives in time. Resets combo index to 0 and returns state to Idle — unless the character is blocking, in which case the blocking state is left intact.
+ 
+---
+ 
+#### CanInterruptAttack (Function)
+**Output:** Can Interrupt (bool)
+ 
+1. **CanInterruptAttack** (entry)
+2. CurrentCombatState == Attacking →
+3. LastExecutedComboIndex < 3 →
+4. Both → **AND**
+5. **Return Node** (Can Interrupt: AND result)
+ 
+**Summary:**
+| Condition | Result |
+|---|---|
+| Not attacking | false |
+| Attacking, LastExecutedComboIndex >= 3 | false — at end of combo |
+| Attacking, LastExecutedComboIndex < 3 | true — combo can still be chained |
+ 
+> Returns true only if actively attacking AND not at the final combo hit (index < 3). The hardcoded value of 3 represents the max combo length for the current attack set.
+ 
+---
+ 
+#### InterruptAttack (Function)
+ 
+1. **InterruptAttack** (entry)
+2. **Cast To BP_ThirdPersonCharacter** (Object: OwnerCharacter)
+   - Cast Failed → exit (nothing)
+   - As BP Third Person Character → Mesh →
+3. **Get Anim Instance** (Target: Skeletal Mesh Component)
+   - Target: Mesh
+   - Return Value →
+4. **Montage Stop** (Target: Anim Instance)
+   - In Blend Out Time: 0.15
+   - Montage: Select Asset (none — stops currently active montage)
+5. **Set Combat State** (Target: self)
+   - New State: Idle
+6. **SET** — Current Combo Index: 0
+ 
+> Stops the active attack montage with a short blend (0.15s), returns state to Idle, and resets combo index. No output pin — fire and forget. Note: Cast Failed exits silently, so this only works on BP_ThirdPersonCharacter owners.
+ 
+---
+ 
+### BP_LockOnComponent (Actor Component)
+**Location:** CombatSystem/Core/Components
+**Parent Class:** Actor Component
+ 
+#### Class Defaults
+| Setting | Value |
+|---|---|
+| Is Locked On | false |
+| Start with Tick Enabled | true |
+| Tick Interval (secs) | 0.0 |
+| Lock on Range | 1000.0 |
+| Lock on Angle | 30.0 |
+| Break Lock Distance | 1500.0 |
+| Auto Activate | false |
+| Component Replicates | false |
+| Editable when Inherited | true |
+ 
+#### Functions (6 total, 5 overridable)
+| Function |
+|---|
+| FindNearestTarget |
+| ToggleLockOn |
+| EnableLockOn |
+| DisableLockOn |
+| UpdateLockOn |
+| SetOwner |
+ 
+#### Variables
+ 
+**Lock-On State**
+| Name | Type |
+|---|---|
+| CurrentTarget | Actor |
+| bIsLockedOn | Boolean |
+ 
+**Lock-On Settings**
+| Name | Type |
+|---|---|
+| LockOnRange | Float |
+| LockOnAngle | Float |
+| BreakLockDistance | Float |
+ 
+**Components**
+| Name | Type |
+|---|---|
+| OwnerActor | Actor |
+ 
+---
+ 
+#### FindNearestTarget (Function)
+**Output:** Target (Actor)
+ 
+**Part 1 — Cache Player Data & Get Candidates**
+1. **FindNearestTarget** (entry)
+2. **SET** — Player Location: **Get Actor Location** (Target: **Get Owner** (self) → Return Value)
+3. **SET** — Player Forward: **Get Actor Forward Vector** (Target: **Get Owner** (self) → Return Value)
+4. **Get All Actors Of Class**
+   - Actor Class: BP_Hitdummy
+   - Out Actors (array) →
+5. **For Each Loop**
+   - Array: Out Actors
+   - Loop Body → (per-enemy checks below)
+   - Completed → **Return Node** (Target: Closest Target)
+ 
+**Part 2 — Per-Enemy: Distance Gate**
+1. **SET** — Distance to Enemy: **Get Distance To**
+   - Target: Array Element (current enemy)
+   - Other Actor: **Get Owner** (self) → Return Value
+2. **Branch 1** (Condition: Distance to Enemy < Lock on Range)
+   - False → skip (continue loop)
+   - True → proceed to angle check
+ 
+**Part 3 — Per-Enemy: Angle Gate**
+1. **SET** — Direction to Enemy: **Normalize**
+   - A: Get Actor Location (Array Element) − Player Location
+   - Tolerance: 0.0001
+2. **dot** (Player Forward · Direction to Enemy) → dot result
+3. **ACOSd** (dot result / 2.0) → angle value
+4. **Branch 2** (Condition: dot result > angle value)
+   - False → skip (outside cone)
+   - True → proceed to closest check
+ 
+**Part 4 — Per-Enemy: Closest Distance Check**
+1. **Branch 3** (Condition: Distance to Enemy < Closest Distance)
+   - False → skip (a closer target already found)
+   - True →
+2. **SET** — Closest Distance: Distance to Enemy
+3. **SET** — Closest Target: Array Element
+ 
+**Return**
+- For Each Completed → **Return Node** (Target: Closest Target)
+ 
+**Local Variables used:**
+| Name | Purpose |
+|---|---|
+| Player Location | Cached owner location |
+| Player Forward | Cached owner forward vector |
+| Distance to Enemy | Per-loop distance to current candidate |
+| Direction to Enemy | Normalized vector from player to candidate |
+| Closest Distance | Running minimum distance |
+| Closest Target | Best candidate so far |
+ 
+> Scans all BP_Hitdummy actors, filters by range (LockOnRange) and angle (LockOnAngle via dot/ACOSd check), then returns the nearest one within the cone. Actor class is currently hardcoded to BP_Hitdummy — will need updating for real enemies.
+ 
+---
+ 
+#### UpdateLockOn (Function)
+ 
+> Called every tick from Event Tick.
+ 
+**Part 1 — Entry Gates**
+1. **UpdateLockOn** (entry)
+2. **Branch 1** (Condition: bIsLockedOn)
+   - False → **Return Node** (exit — not locked on)
+   - True →
+3. **Cast To Actor** (Object: Owner Actor)
+   - Cast Failed → **Return Node** (exit)
+   - As Actor →
+4. **Get Component by Class** (Target: As Actor)
+   - Component Class: BP Combat Component
+   - Return Value →
+5. **Get Combat State** (Target: BP Combat Component) → State →
+6. **Branch 2** (Condition: State == Dodging)
+   - True → **Print String** "Dodging - not rotating" (Development Only) → skip rotation, continue to validity check
+   - False → proceed to validity check
+ 
+**Part 2 — Validity & Break Distance Check**
+1. **Is Valid** (Object: Current Target) →
+2. **Branch 3** (Condition: Is Valid)
+   - False → **Return Node** (exit — target gone)
+   - True →
+3. **Get Distance To** (Target: Current Target, Other Actor: Owner Actor) → distance →
+4. **Branch 4** (Condition: distance > Break Lock Distance)
+   - True → **Disable Lock On** (Target: self) → **Return Node** (exit — target out of range)
+   - False → proceed to rotation (only if NOT dodging)
+ 
+**Part 3 — Rotation Update (skipped if dodging)**
+1. **SET** — Target Location: **Get Actor Location** (Target: Current Target)
+2. **Find Look at Rotation**
+   - Start: **Get Actor Location** (**Get Owner** (self) → Return Value)
+   - Target: Target Location
+   - Return Value Z (Yaw) →
+3. **Make Rotator**
+   - X (Roll): 0.0
+   - Y (Pitch): 0.0
+   - Z (Yaw): Find Look at Rotation Z (Yaw only — no tilt)
+4. **SET** — Target Rotation: Make Rotator result
+5. **GET Actor Rotation** (Target: **Get Owner** (self)) →
+6. **SET** — Current Rotation: Get Actor Rotation result
+7. **RInterp To**
+   - Current: Current Rotation
+   - Target: Target Rotation
+   - Delta Time: **Get World Delta Seconds**
+   - Interp Speed: 10.0
+   - Return Value →
+8. **Set Actor Rotation** (Target: Owner Actor)
+   - New Rotation: RInterp To Return Value
+   - Teleport Physics: false
+ 
+> Runs every tick. Guards against: not locked on, invalid owner cast, dodge state (skips rotation only), invalid/dead target, target exceeding BreakLockDistance. Rotation uses Yaw-only LookAt interpolated at speed 10 to smoothly face the locked target without tilting the character.
+ 
+---
+ 
+#### DisableLockOn (Function)
+ 
+1. **DisableLockOn** (entry)
+2. **SET** — Is Locked On: false
+3. **SET** — Current Target: None (cleared)
+4. **Cast To BP_ThirdPersonCharacter** (Object: Owner Actor)
+   - Cast Failed → exit
+   - As BP Third Person Character →
+5. **SET** — Orient Rotation To Movement: true
+   - Target: Character Movement (from As BP Third Person Character)
+ 
+> Exact mirror of EnableLockOn — clears the target, unflag bIsLockedOn, and re-enables Orient Rotation To Movement so the character goes back to facing their movement direction.
+ 
+---
+ 
+#### EnableLockOn (Function)
+ 
+1. **EnableLockOn** (entry)
+2. **Find Nearest Target** (Target: self) → Target →
+3. **Is Valid** (Object: Target) →
+4. **Branch** (Condition: Is Valid)
+   - False → **Print String** "No valid target in range" (Development Only) → exit
+   - True →
+5. **SET** — Current Target: Target (from Find Nearest Target)
+6. **SET** — Is Locked On: true
+7. **Cast To BP_ThirdPersonCharacter** (Object: Owner Actor)
+   - Cast Failed → exit
+   - As BP Third Person Character →
+8. **SET** — Orient Rotation To Movement: false
+   - Target: Character Movement (from As BP Third Person Character)
+ 
+> Finds the nearest valid target, sets it as CurrentTarget, flags bIsLockedOn, and disables Orient Rotation To Movement so the character can face the locked target instead of their movement direction.
+ 
+---
+ 
+#### ToggleLockOn (Function)
+ 
+1. **ToggleLockOn** (entry)
+2. **Branch** (Condition: bIsLockedOn == true)
+   - True → **Disable Lock On** (Target: self)
+   - False → **Enable Lock On** (Target: self)
+ 
+> Simple toggle — if already locked on, disable it; otherwise enable it.
+ 
+---
+ 
+#### SetOwner (Function)
+ 
+1. **SetOwner** (entry)
+2. **SET** — Owner Actor: **Get Owner** (Target: self/Actor Component) → Return Value
+ 
+> Caches the component's owning actor into the OwnerActor variable. Called first in Event BeginPlay so all other functions can reference OwnerActor directly without repeated Get Owner calls.
+ 
+---
+ 
+#### Event BeginPlay
+1. **Event Begin Play** →
+2. **Set Owner** (Target: self/BP_LockOn Component)
+3. → **Cast To BP_ThirdPersonCharacter**
+   - Object: **Get Owner** (Target: self/Actor Component) → Return Value
+   - Cast Failed → **Print String** "ERROR: Owner is not ThirdPersonCharacter!" (Development Only)
+   - As BP Third Person Character →
+4. **SET** — Spring Arm Component: Camera Boom (from As BP Third Person Character)
+5. **SET** — Camera Component: Follow Camera (from As BP Third Person Character)
+ 
+> Caches the owner's Camera Boom (Spring Arm) and Follow Camera references on BeginPlay for use in UpdateLockOn.
+ 
+> **Compiler Warning:** "OwnerActor is already a 'Actor', you don't need Cast To Actor" — unnecessary cast elsewhere in component.
+ 
+---
+ 
+#### Event Tick
+1. **Event Tick**
+   - Delta Seconds →
+2. **Update Lock On** (Target: self)
+ 
+> Calls UpdateLockOn every tick (interval 0.0) to continuously track and rotate toward the locked target.
+ 
+---
+ 
+### BP_StatsComponent (Actor Component)
+**Location:** CombatSystem/Core/Components
+**Parent Class:** Actor Component
+ 
+#### Functions (15 total, 13 overridable)
+| Function |
+|---|
+| InitializeStats |
+| ConsumeStamina |
+| ApplyPoiseDamage |
+| StartPoiseRegeneration |
+| RegeneratePoise |
+| HandleDeath |
+| Heal |
+| GetHealthPercent |
+| GetStaminaPercent |
+| GetPoisePercent |
+| HasStamina |
+| ApplyDamage |
+| StartStaminaRegeneration |
+| RegenerateStamina |
+| StopStaminaRegeneration |
+ 
+#### Variables
+ 
+**Stats**
+| Name | Type |
+|---|---|
+| BaseStat | S Combat Stat (Struct) |
+| CurrentHealth | Float |
+| CurrentStamina | Float |
+| CurrentPoise | Float |
+| bIsRegeneratingStamina | Boolean |
+| bIsRegeneratingPoise | Boolean |
+| bIsDead | Boolean |
+| LastDamageTime | Float |
+| LastStaminaUseTime | Float |
+| StaminaRegenTimerHandle | Timer Handle |
+| PoiseRegenTimerHandle | Timer Handle |
+ 
+#### Event Dispatchers
+- OnHealthChanged
+- OnStaminaChanged
+- OnPoiseChanged
+- OnPoiseBroken
+- OnDeath
+- OnStaminaDepleted
+ 
+---
+ 
+#### RegenerateStamina (Function)
+ 
+> Called every 0.1s by the looping timer set in StartStaminaRegeneration.
+ 
+**Gate 1 — Stop if blocking**
+1. **RegenerateStamina** (entry)
+2. **Get Component by Class** (Target: **Get Owner** (self)) — Component Class: BP Combat Component
+3. **GET** bIsBlocking (from BP Combat Component) → Is Blocking
+4. **AND**
+   - Is Blocking
+   - bIsRegeneratingStamina
+5. **Branch 1** (Condition: AND result)
+   - True (blocking mid-regen) → **Stop Stamina Regeneration** (Target: self) → exit
+   - False → proceed
+ 
+**Gate 2 — Skip if flag cleared or already full**
+1. **AND**
+   - bIsRegeneratingStamina
+   - CurrentStamina < BaseStat.MaxStamina
+2. **Branch 2** (Condition: AND result)
+   - False → exit (loop fires again next tick)
+   - True → proceed with regen tick
+ 
+**Regen Tick**
+1. **+** (CurrentStamina + BaseStat.StaminaRegenRate × 0.1) → regen amount
+2. **Clamp (Float)**
+   - Value: regen amount
+   - Min: 0.0
+   - Max: BaseStat.MaxStamina
+   - Return Value →
+3. **SET** — Current Stamina: Clamp result
+4. **Call On Stamina Changed** (event dispatcher)
+   - Target: self
+   - Current Stamina: Current Stamina
+   - Max Stamina: BaseStat.MaxStamina
+ 
+**Stop if full after this tick**
+1. **Branch 3** (Condition: CurrentStamina >= BaseStat.MaxStamina)
+   - True → **Stop Stamina Regeneration** (Target: self) → exit (reached max)
+   - False → exit (loop fires again in 0.1s)
+ 
+> Mirrors RegeneratePoise pattern but with an extra blocking gate. If the owner starts blocking mid-regen, stamina regen is cancelled immediately.
+ 
+---
+ 
+#### StartStaminaRegeneration (Function)
+ 
+1. **StartStaminaRegeneration** (entry)
+2. **Get Component by Class** (Target: **Get Owner** (self) → Return Value)
+   - Component Class: BP Combat Component
+   - Return Value →
+3. **Get Combat State** (Target: BP Combat Component) → State →
+4. **Switch on E_CombatState** (Selection: State)
+   - Idle → proceed
+   - Attacking → **Return Node** (exit — no regen while attacking)
+   - Blocking → **Return Node** (exit)
+   - Dodging → **Return Node** (exit)
+   - Staggered → **Return Node** (exit)
+   - Dead → **Return Node** (exit)
+5. **SET** — Is Regenerating Stamina: true
+6. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "RegenerateStamina"
+   - Time: 0.1
+   - Looping: true
+   - Max Once Per Frame: false
+   - Return Value →
+7. **SET** — Stamina Regen Timer Handle: Return Value
+ 
+> Only starts stamina regen if the owner is in Idle state. All active combat states (Attacking, Blocking, Dodging, Staggered, Dead) abort early. Starts a looping 0.1s timer calling RegenerateStamina.
+ 
+**E_CombatState enum values confirmed:**
+- Idle
+- Attacking
+- Blocking
+- Dodging
+- Staggered
+- Dead
+ 
+---
+ 
+#### ApplyDamage (Function)
+**Input:** Damage Info (S_DamageInfo)
+**Output:** Actual Damage (float)
+ 
+**Gate**
+1. **ApplyDamage** (entry) — Input: Damage Info
+2. **Branch** (Condition: bIsDead)
+   - True → **Return Node** (Actual Damage: 0.0) — already dead
+   - False →
+ 
+**Apply Health Damage**
+1. **Break S_DamageInfo** — exposes: DamageAmount, DamageType, PoiseDamage, Instigator, HitLocation, HitDirection, CanBeBlocked
+2. **Break S Combat Stats** (Base Stat)
+3. **SET** — Actual DMG: DamageInfo.DamageAmount
+4. **Clamp (Float)**
+   - Value: CurrentHealth − Actual DMG
+   - Min: 0.0
+   - Max: BaseStat.MaxHealth
+   - Return Value →
+5. **SET** — Current Health: Clamp result
+6. **SET** — Last Damage Time: **Get Game Time in Seconds**
+7. **Call On Health Changed** (event dispatcher)
+   - Target: self
+   - Current Health: Current Health
+   - Max Health: BaseStat.MaxHealth
+   - Damage Causer: DamageInfo.Instigator
+8. **Apply Poise Damage** (Target: self)
+   - Amount: DamageInfo.PoiseDamage
+   - Hit Direction: DamageInfo.HitDirection
+ 
+**Death Check**
+1. **Branch** (Condition: CurrentHealth <= 0.0)
+   - False → **Return Node** (Actual Damage: Actual DMG) — damaged but alive
+   - True →
+2. **SET** — Is Dead: true
+3. **Call On Death** (event dispatcher)
+   - Target: self
+   - Killer: DamageInfo.Instigator
+4. **Handle Death** (Target: self)
+   - Killer: DamageInfo.Instigator
+5. **Return Node** (Actual Damage: Actual DMG)
+ 
+**S_DamageInfo struct fields confirmed:**
+| Field | Type |
+|---|---|
+| DamageAmount | Float |
+| DamageType | Enum |
+| PoiseDamage | Float |
+| Instigator | Actor |
+| HitLocation | Vector |
+| HitDirection | Vector |
+| CanBeBlocked | Bool |
+ 
+> Central damage pipeline. Applies health damage, fires poise damage in parallel, checks for death, fires OnDeath + HandleDeath if health hits 0.
+ 
+---
+ 
+#### HasStamina (Function)
+**Input:** Amount (float)
+**Output:** Has Enough (bool)
+ 
+1. **HasStamina** (entry) — Input: Amount
+2. **Return Node** (Has Enough: CurrentStamina >= Amount)
+ 
+> Pure check — no side effects. Returns true if CurrentStamina can cover the requested amount.
+ 
+---
+ 
+#### GetPoisePercent (Function)
+**Output:** Percent (float)
+ 
+1. **GetPoisePercent** (entry)
+2. **Break S Combat Stats** (Base Stat)
+3. **Branch** (Condition: BaseStat.MaxPoise > 0.0)
+   - False → **Return Node** (Percent: 0.0) — guard against divide by zero
+   - True → **Return Node** (Percent: CurrentPoise ÷ BaseStat.MaxPoise)
+ 
+> Same pattern as GetHealthPercent and GetStaminaPercent — returns 0.0–1.0 poise ratio with zero-division guard.
+ 
+---
+ 
+#### GetStaminaPercent (Function)
+**Output:** Percent (float)
+ 
+1. **GetStaminaPercent** (entry)
+2. **Break S Combat Stats** (Base Stat)
+3. **Branch** (Condition: BaseStat.MaxStamina > 0.0)
+   - False → **Return Node** (Percent: 0.0) — guard against divide by zero
+   - True → **Return Node** (Percent: CurrentStamina ÷ BaseStat.MaxStamina)
+ 
+> Exact mirror of GetHealthPercent — returns 0.0–1.0 stamina ratio with zero-division guard.
+ 
+---
+ 
+#### GetHealthPercent (Function)
+**Output:** Percent (float)
+ 
+1. **GetHealthPercent** (entry)
+2. **Break S Combat Stats** (Base Stat)
+3. **Branch** (Condition: BaseStat.MaxHealth > 0.0)
+   - False → **Return Node** (Percent: 0.0) — guard against divide by zero
+   - True → **Return Node** (Percent: CurrentHealth ÷ BaseStat.MaxHealth)
+ 
+> Returns 0.0–1.0 health ratio. Zero-division guard prevents crash if MaxHealth is not set.
+ 
+---
+ 
+#### Heal (Function)
+**Input:** Amount (float)
+**Output:** Actual Healing (float)
+ 
+1. **Heal** (entry) — Input: Amount
+2. **Branch** (Condition: bIsDead)
+   - True → **Return Node** (Actual Healing: 0.0) — can't heal a dead character
+   - False →
+3. **Break S Combat Stats** (Base Stat)
+4. **SET** — Old Health: CurrentHealth (cache pre-heal value)
+5. **Clamp (Float)**
+   - Value: CurrentHealth + Amount
+   - Min: 0.0
+   - Max: BaseStat.MaxHealth
+   - Return Value →
+6. **SET** — Current Health: Clamp result
+7. **SET** — Actual Heal: CurrentHealth − Old Health (real amount healed after clamping)
+8. **Call On Health Changed** (event dispatcher)
+   - Target: self
+   - Current Health: Current Health
+   - Max Health: BaseStat.MaxHealth
+   - Damage Causer: (none)
+9. **Return Node** (Actual Healing: Actual Heal)
+ 
+> Returns the true amount healed (not the requested amount) after clamping to MaxHealth. Returns 0 if dead.
+ 
+---
+ 
+#### HandleDeath (Function)
+**Input:** Killer (Actor)
+ 
+1. **HandleDeath** (entry) — Input: Killer
+2. **Clear and Invalidate Timer by Handle** — Handle: Stamina Regen Timer Handle
+3. **Clear and Invalidate Timer by Handle** — Handle: Poise Regen Timer Handle
+4. **SET** — Is Regenerating Stamina: false
+5. **SET** — Is Regenerating Poise: false
+6. **Print String** "Character Died" (Development Only)
+7. → (continues off-screen — expected: SET bIsDead = true + Call On Death dispatcher with Killer)
+ 
+> Stops all regen timers, clears both regen flags, then logs death. Full death dispatch (OnDeath + bIsDead) is off-screen to the right.
+ 
+---
+ 
+#### RegeneratePoise (Function)
+ 
+> Called every 0.1s by the looping timer set in StartPoiseRegeneration. Note: function name has a typo — "RegenratePoise" in Blueprint.
+ 
+**Gate — Skip if already full**
+1. **RegenratePoise** (entry)
+2. **Break S Combat Stats** (Base Stat)
+3. **Branch 1** (Condition: CurrentPoise < BaseStat.MaxPoise)
+   - False (already full) → **SET** Is Regenerating Poise: false → **Clear and Invalidate Timer by Handle** (Poise Regen Timer Handle) → exit
+   - True → proceed with regen
+ 
+**Regen Tick**
+1. **+** (CurrentPoise + BaseStat.PoiseRegenRate × 0.1) → regen amount
+2. **Clamp (Float)**
+   - Value: regen amount
+   - Min: 0.0
+   - Max: BaseStat.MaxPoise
+   - Return Value →
+3. **SET** — Current Poise: Clamp result
+4. **Call On Poise Changed** (event dispatcher)
+   - Target: self
+   - Current Posie: Current Poise
+   - Max Posie: BaseStat.MaxPoise
+ 
+**Stop if full after this tick**
+1. **Branch 2** (Condition: CurrentPoise >= BaseStat.MaxPoise)
+   - True (reached max) → **SET** Is Regenerating Poise: false → **Clear and Invalidate Timer by Handle** (Poise Regen Timer Handle) → stop loop
+   - False (still regenerating) → exit (loop fires again in 0.1s)
+ 
+> Two exit conditions: already at max when tick fires (gate), or reached max during this tick (post-regen check). Both clear the timer and unflag bIsRegeneratingPoise.
+ 
+---
+ 
+#### StartPoiseRegeneration (Function)
+ 
+1. **StartPoiseRegeneration** (entry)
+2. **SET** — Is Regenerating Poise: true
+3. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "RegeneratePoise"
+   - Time: 0.1
+   - Looping: true
+   - Max Once Per Frame: false
+   - Return Value →
+4. **SET** — Poise Regen Timer Handle: Return Value
+ 
+> Flags bIsRegeneratingPoise and starts a looping timer every 0.1s that calls RegeneratePoise. Called after the poise regen delay (set in ApplyPoiseDamage) expires.
+ 
+---
+ 
+#### ApplyPoiseDamage (Function)
+**Inputs:** Amount (float), Hit Direction (vector)
+ 
+**Deduct & Notify**
+1. **ApplyPoiseDamage** (entry) — Inputs: Amount, Hit Direction
+2. **Break S Combat Stats** (Base Stat)
+3. **Clamp (Float)**
+   - Value: CurrentPoise − Amount
+   - Min: 0.0
+   - Max: BaseStat.MaxPoise
+   - Return Value →
+4. **SET** — Current Poise: Clamp result
+5. **Call On Poise Changed** (event dispatcher)
+   - Target: self
+   - Current Posie: Current Poise
+   - Max Posie: BaseStat.MaxPoise
+ 
+**Poise Break Check**
+1. **Branch** (Condition: CurrentPoise <= 0.0)
+ 
+**True — Poise Broken:**
+1. **Call On Poise Broken** (event dispatcher)
+   - Target: self
+   - Attack Direction: Hit Direction
+2. **SET** — Current Poise: BaseStat.MaxPoise (reset to full so poise can break again after recovery)
+3. **Clear and Invalidate Timer by Handle**
+   - Handle: Poise Regen Timer Handle
+4. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "StartPoiseRegeneration"
+   - Time: BaseStat.PoiseRegenDelay
+   - Looping: false
+   - Return Value →
+5. **SET** — Poise Regen Timer Handle: Return Value
+ 
+**False — Poise Damaged (not broken):**
+1. **Clear and Invalidate Timer by Handle**
+   - Handle: Poise Regen Timer Handle
+2. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "StartPoiseRegeneration"
+   - Time: BaseStat.PoiseRegenDelay
+   - Looping: false
+   - Return Value →
+3. **SET** — Poise Regen Timer Handle: Return Value
+ 
+> Both paths reset the poise regen timer. If poise hits 0, also fires OnPoiseBroken (which triggers stagger via HandlePoiseBroken in BP_CombatComponent) and resets CurrentPoise to MaxPoise so the poise system is ready for the next hit sequence.
+ 
+---
+ 
+#### ConsumeStamina (Function)
+**Input:** Amount (float)
+**Output:** Success (bool)
+ 
+**Gate — Stamina Check**
+1. **ConsumeStamina** (entry) — Input: Amount
+2. **Branch** (Condition: CurrentStamina >= Amount)
+   - False → **Return Node** (Success: false) — not enough stamina
+   - True →
+ 
+**Deduct & Clamp**
+1. **Clamp (Float)**
+   - Value: CurrentStamina − Amount
+   - Min: 0.0
+   - Max: BaseStat.MaxStamina
+   - Return Value →
+2. **SET** — Current Stamina: Clamp result
+3. **SET** — Last Stamina Use Time: **Get Game Time in Seconds**
+ 
+**Reset & Restart Regen Timer**
+1. **Clear and Invalidate Timer by Handle**
+   - Handle: StaminaRegenTimerHandle
+2. **Set Timer by Function Name**
+   - Object: self
+   - Function Name: "StartStaminaRegeneration"
+   - Time: BaseStat.StaminaRegenDelay
+   - Looping: false
+   - Initial Start Delay: 0.5
+   - Initial Start Delay Variance: 0.0
+   - Return Value →
+3. **SET** — Stamina Regen Timer Handle: Return Value
+ 
+**Notify & Return**
+1. **Call On Stamina Changed** (event dispatcher)
+   - Target: self
+   - Current Stamina: Current Stamina
+   - Max Stamina: BaseStat.MaxStamina
+2. **Branch** (Condition: CurrentStamina > 0.0)
+   - True → **Return Node** (Success: true) — stamina consumed, still has some left
+   - False → **Call On Stamina Depleted** (Target: self) → **Return Node** (Success: true) — stamina hit 0, fire notification
+ 
+> Deducts stamina, clamps to 0–MaxStamina, resets the regen timer (with 0.5s initial delay), fires OnStaminaChanged, and fires OnStaminaDepleted if stamina reaches 0. Always returns true if the initial check passes.
+ 
+---
+ 
+#### InitializeStats (Function)
+ 
+1. **InitializeStats** (entry)
+2. **Break S Combat Stats** (Base Stat variable)
+   - Outputs: Max Health, Max Stamina, Stamina Regen Rate, Stamina Regen Delay, Poise Regen Rate, Posie Regen Delay (typo in field name), Max Poise
+3. **SET** — Current Health: Max Health
+4. **SET** — Current Stamina: Max Stamina
+5. **SET** — Current Poise: Max Poise
+6. **SET** — Is Dead: false
+7. **Call On Health Changed** (event dispatcher)
+   - Target: self
+   - Current Health: Current Health
+   - Max Health: Max Health
+   - Damage Causer: (none)
+8. **Call On Stamina Changed** (event dispatcher)
+   - Target: self
+   - Current Stamina: Current Stamina
+   - Max Stamina: Max Stamina
+9. **Call On Poise Changed** (event dispatcher)
+   - Target: self
+   - Current Posie: Current Poise (note: field name has typo "Posie")
+   - Max Posie: Max Poise (same typo)
+ 
+> Sets all current stats to their max values from BaseStat, clears the dead flag, then fires all three change dispatchers so any bound UI or systems start with correct values.
+ 
+**S_CombatStat struct fields revealed:**
+| Field | Type | Note |
+|---|---|---|
+| Max Health | Float | |
+| Max Stamina | Float | |
+| Stamina Regen Rate | Float | |
+| Stamina Regen Delay | Float | |
+| Poise Regen Rate | Float | |
+| Posie Regen Delay | Float | Typo in field name — should be "Poise" |
+| Max Poise | Float | |
+ 
+**Event Dispatcher signatures revealed:**
+| Dispatcher | Pins |
+|---|---|
+| OnHealthChanged | Current Health (float), Max Health (float), Damage Causer (Actor) |
+| OnStaminaChanged | Current Stamina (float), Max Stamina (float) |
+| OnPoiseChanged | Current Posie (float), Max Posie (float) — typo in pin names |
+ 
+---
+ 
+#### Event BeginPlay
+1. **Event Begin Play** →
+2. **Initialize Stats** (Target: self)
+ 
+---
+ 
+#### StopStaminaRegeneration (Function)
+ 
+1. **StopStaminaRegeneration** (entry)
+2. **SET** — Is Regenerating Stamina: false
+3. **Clear and Invalidate Timer by Handle**
+   - Handle: Stamina Regen Timer Handle
+ 
+> Called by RegenerateStamina (when stamina is full or owner is blocking) and by HandleDeath. Clears the bIsRegeneratingStamina flag and kills the looping timer in one pass.
+ 
+---
+ 
+---
+ 
+### BP_WeaponComponent (Actor Component)
+**Parent Class:** Actor Component
+**Location:** CombatSystem/Core/Components
+ 
+#### Variables
+ 
+**Weapon group:**
+| Variable | Type | Note |
+|---|---|---|
+| CurrentWeaponData | S_WeaponData (struct) | |
+| WeaponMeshComponent | Skeletal Mesh Component | |
+| WeaponCollision | Capsule Collision Component | |
+| bWeaponActive | Boolean | |
+| HitActorsThisSwing | Array of Actor | Tracks which actors were already hit this swing |
+ 
+**Config group:**
+| Variable | Type | Note |
+|---|---|---|
+| TraceChannel | ETraceTypeQuery | |
+| DebugDrawDuration | Float | |
+| DebugDrawHits | Boolean | |
+| WeaponActor | BP_WeaponBase (ref) | Set at BeginPlay from owner's Equipped Weapon |
+| Hit Actor | Actor | Last hit actor (set by OnWeaponHit) |
+| OwnerRef | BP_ThirdPersonCharacter (ref) | Set at BeginPlay via cast |
+ 
+#### Functions
+ 
+---
+ 
+#### SetWeaponReference (Function)
+**Input:** Weapon (BP_WeaponBase)
+No outputs.
+ 
+1. **SetWeaponReference** (entry) — Input: Weapon
+2. **SET** — Weapon Actor: Weapon
+ 
+> Simple setter. Updates the WeaponActor reference directly. Used when the equipped weapon changes outside of SwitchWeapon (e.g. initial equip from character).
+ 
+---
+ 
+#### SwitchWeapon (Function)
+**Input:** New Weapon Data (S_WeaponData)
+**Output:** Success (bool)
+ 
+1. **SwitchWeapon** (entry) — Input: New Weapon Data
+2. **Disable Weapon Collision** (Target: self/BP_WeaponComponent)
+3. **Initialize Weapon** (Target: self/BP_WeaponComponent)
+   - Weapon Data: New Weapon Data
+   - Success (bool output) →
+4. **Return Node** — Success: Success
+ 
+> Safely swaps the active weapon — disables collision first so no hits fire mid-switch, then re-initializes with the new weapon data. Returns whatever InitializeWeapon returns (true if mesh was found, false otherwise).
+ 
+---
+ 
+#### GetCurrentWeaponData (Function)
+No inputs.
+**Output:** Weapon Data (S_WeaponData)
+ 
+1. **GetCurrentWeaponData** (entry)
+2. **Return Node** — Weapon Data: CurrentWeaponData
+ 
+> Simple getter. Returns the cached CurrentWeaponData variable.
+ 
+---
+ 
+#### HandleWeaponOverlap (Function)
+**Inputs:** Overlapped Component (Primitive Component), Other Actor (Actor), Other Comp (Primitive Component), Other Body Index (int), From Sweep (bool), Sweep Result (Hit Result)
+No outputs.
+ 
+**Triple Early-Exit Guard**
+1. **HandleWeaponOverlap** (entry)
+2. Three conditions feed into **OR**:
+   - **NOT** bWeaponActive — weapon isn't active this swing
+   - **==** Other Actor == **Get Owner** (Target: self) → skip hitting ourselves
+   - **CONTAINS** — HitActorsThisSwing contains Other Actor → already hit this actor
+3. **Branch 1** — Condition: OR result
+   - True → exit (any bail-out condition met)
+   - False →
+ 
+**Interface Check**
+4. **Does Object Implement Interface**
+   - Test Object: Other Actor
+   - Interface: BPI_Damageable
+   - Return Value →
+5. **Branch 2** — Condition: Return Value
+   - False → exit (target can't take damage)
+   - True →
+ 
+**Register Hit**
+6. **Branch 3** — Condition: (additional validity check — wire partially off-screen)
+   - False → exit
+   - True →
+7. **ADD** — HitActorsThisSwing + Other Actor
+ 
+**Build Damage Info**
+8. **Break Hit Result** — Hit: Sweep Result
+   - Location (yellow) → Hit Location pin below
+9. **Get Owner** (Target: self — Target is Actor Component) → Return Value
+10. **Get Actor Forward Vector** (Target: Get Owner → Return Value) → Return Value (yellow)
+11. **Make S Damage Info**
+    - Damage Amount: **20.0**
+    - Damage Type: **Physical**
+    - Poise Damage: **15.0**
+    - Instigator: Get Owner → Return Value
+    - Hit Location: Break Hit Result → Location
+    - Hit Direction: Get Actor Forward Vector → Return Value
+    - Can be Blocked: **true** (✓)
+    - → S Damage Info
+ 
+**Apply Damage via Interface**
+12. **Take Damage** (Target is BPI_Damageable)
+    - Target: Other Actor
+    - Damage Info: S Damage Info
+    - Was Damaged (bool output) →
+ 
+**Debug Visualisation**
+13. **Branch** — Condition: DebugDrawHits variable
+    - False → exit
+    - True →
+14. **Draw Debug Sphere** (Development Only)
+    - Center: Break Hit Result → Location
+    - Radius: 25.0
+    - Segments: 12
+    - Line Color: blue
+    - Duration: 10.0
+    - Thickness: 0.0
+    - Depth Priority: World
+ 
+> Core hit-detection function bound to the weapon collider's overlap event. Guards against inactive weapon, self-hits, and repeat hits before checking BPI_Damageable, then builds an S_DamageInfo struct (20 damage, 15 poise damage, Physical type, blockable) using the sweep location and owner's forward vector, and calls TakeDamage through the interface. Optionally draws a debug sphere at the hit point.
+ 
+---
+ 
+#### EnableWeaponCollision (Function)
+No inputs. No outputs.
+ 
+**Reset Hit List**
+1. **EnableWeaponCollision** (entry)
+2. **CLEAR** — HitActorsThisSwing (empties the array before the new swing)
+ 
+**Guard — Weapon Actor valid?**
+3. **Branch 1** — Condition: **Is Valid** (Object: Weapon Actor)
+   - False → **Print String** "WeaponActor is NULL" (Development Only) → exit
+ 
+**Guard — Cast to weapon blueprint**
+4. **Cast To BP_Weapon_BlackKnightSword** — Object: Weapon Actor
+   - Cast Failed → **Print String** "ERROR: WeaponActor is NULL" (Development Only) → exit
+   - As BP Weapon Black Knight Sword → (NOTE annotation on wire)
+ 
+**Guard — Hit box valid?**
+5. **Branch 2** — Condition: **Is Valid** (Object: Weapon Hit Box from cast result)
+   - False → **Print String** "ERROR: Cast failed" (Development Only) → exit
+   - True →
+ 
+**Enable Collision**
+6. **Set Collision Enabled** (Target is Primitive Component)
+   - Target: Weapon Hit Box
+   - New Type: **Query Only (No Physics Collision)**
+ 
+**Guard — WeaponActor still valid after enable?**
+7. **Branch 3** — Condition: **Is Valid** (Object: Weapon Actor)
+   - False → **Print String** "ERROR: WeaponHitBox is NULL!" (Development Only) → exit
+   - True → exit (success, no return value)
+ 
+> Clears HitActorsThisSwing then works through three Is Valid guards before enabling the weapon's hit box collision. All failure paths are dev-only print strings. Called by animation notifies at the start of an attack swing.
+ 
+---
+ 
+#### DisableWeaponCollision (Function)
+No inputs. No outputs.
+ 
+1. **DisableWeaponCollision** (entry)
+2. **Cast To BP_Weapon_BlackKnightSword** — Object: Weapon Actor
+   - Cast Failed → exit (no error handling)
+   - As BP Weapon Black Knight Sword → (NOTE annotation on wire)
+3. **Set Collision Enabled** (Target is Primitive Component)
+   - Target: Weapon Hit Box
+   - New Type: **No Collision**
+ 
+> Mirror of EnableWeaponCollision but simpler — no Is Valid guards, just cast and disable. Sets the hit box to No Collision. Called by animation notifies at the end of an attack swing. Does NOT clear HitActorsThisSwing (that's handled by EnableWeaponCollision at the start of the next swing).
+ 
+---
+ 
+#### InitializeWeapon (Function)
+**Input:** Weapon Data (S_WeaponData)
+**Output:** Success (bool)
+ 
+1. **InitializeWeapon** (entry) — Input: Weapon Data
+2. **SET** — Current Weapon Data: Weapon Data
+3. **Cast To Character**
+   - Object: **Get Owner** (Target: self — Target is Actor Component) → Return Value
+   - Cast Failed → **Print String** "Weapon Component owner is not a Character" (Development Only) → **Return Node** (Success: false)
+   - As Character →
+4. **SET** — Weapon Mesh Component: **Get Component by Class** (Target: As Character, Component Class: Skeletal Mesh) → Return Value
+5. **Branch** — Condition: **Is Valid** (Object: Weapon Mesh Component)
+   - True → **Return Node** (Success: true)
+   - False → **Print String** "Failed to find mesh component" (Development Only) → **Return Node** (Success: false)
+ 
+> Caches weapon data and finds the owner's Skeletal Mesh component. Two guarded failure paths: owner isn't a Character, or no Skeletal Mesh found on the Character. Returns true only if both checks pass.
+ 
+---
+ 
+#### Event BeginPlay
+ 
+1. **Event Begin Play** →
+2. **Get Owner** (Target: self — Target is Actor Component) → Return Value →
+3. **Cast To BP_ThirdPersonCharacter**
+   - Object: Return Value (owner)
+   - Cast Failed → (nothing)
+   - As BP Third Person Character →
+4. **SET** — Weapon Actor: (cast result).Equipped Weapon
+5. **SET** — Owner Ref: (cast result)
+ 
+> On BeginPlay, casts the owning actor to BP_ThirdPersonCharacter, then caches the character's Equipped Weapon as WeaponActor and the character itself as OwnerRef.
+ 
+---
+ 
+#### OnWeaponHit (Custom Event)
+**Inputs:** Hit Actor (Actor), Hit Location (Vector)
+ 
+**Duplicate Hit Guard**
+1. **OnWeaponHit** (entry) — Inputs: Hit Actor, Hit Location
+2. **SET** — Hit Actor: Hit Actor (caches to variable)
+3. **Branch** — Condition: HitActorsThisSwing **CONTAINS** Hit Actor
+   - True → exit (already damaged this actor this swing)
+   - False →
+ 
+**Register & Deal Damage**
+1. **ADD** — HitActorsThisSwing + Hit Actor (add to already-hit list)
+2. **Apply Damage**
+   - Damaged Actor: Hit Actor
+   - Base Damage: 20.0
+   - Event Instigator: **Get Player Controller** (Player Index: 0) → Return Value
+   - Damage Causer: Weapon Actor
+   - Damage Type Class: Damage Type (default)
+   - Hit Actor: Hit Actor
+   - Return Value → (unused)
+ 
+**Hit VFX**
+1. **Spawn Emitter at Location**
+   - Emitter Template: P_ky_hit_thund (particle asset)
+   - Location: Hit Location
+   - Rotation: X 0.0, Y 0.0, Z 0.0
+   - Scale: X 0.1, Y 0.1, Z 0.1
+   - Auto Destroy: true
+   - Pooling Method: None
+   - Auto Activate System: true
+ 
+**Camera Shake — Combo-Sensitive**
+1. **Branch** — Condition: (Owner Ref → Combat Component → Last Executed Combo Index) == 3
+   - True (final hit of combo) →
+     - **Client Start Camera Shake** (Replicated To Owning Client)
+       - Target: **Get Player Controller** (Player Index: 0)
+       - Shake: CS_Hit Impact
+       - Scale: **2.0**
+       - Play Space: Camera Local
+       - User Play Space Rot: X 0.0, Y 0.0, Z 0.0
+   - False (mid-combo hit) →
+     - **Client Start Camera Shake** (Replicated To Owning Client)
+       - Target: **Get Player Controller** (Player Index: 0)
+       - Shake: CS_Hit Impact
+       - Scale: **0.5**
+       - Play Space: Camera Local
+       - User Play Space Rot: X 0.0, Y 0.0, Z 0.0
+ 
+> Fires each time the weapon collider overlaps an actor. Uses HitActorsThisSwing to prevent multi-hitting the same actor in one swing. Deals 20 flat damage, spawns a hit particle, then plays a camera shake scaled by combo position — 2.0x on the final combo hit (index 3), 0.5x otherwise. HitActorsThisSwing must be cleared by DisableWeaponCollision or a separate reset call between swings.
+ 
+---
+ 
+---
+ 
+### BPI_Combatant (Interface)
+**Parent Class:** Interface
+**Location:** CombatSystem/Core/Interfaces
+ 
+#### Functions
+ 
+| Function | Inputs | Outputs |
+|---|---|---|
+| CanAttack | — | bCanAttack (bool) |
+| ExecuteAttack | AttackType (E_AttackType) | bSuccess (bool) |
+| GetComboState | — | CombatState (E_CombatState, default: Idle) |
+| InterruptAction | bForce (bool) | bInterrupted (bool) |
+ 
+#### CanAttack
+No inputs.
+**Output:** bCanAttack (bool)
+ 
+> Returns whether the implementing actor is currently able to attack.
+ 
+---
+ 
+#### ExecuteAttack
+**Input:** AttackType (E_AttackType enum)
+**Output:** bSuccess (bool)
+ 
+> Triggers an attack of the specified type on the implementing actor. Returns whether the attack was successfully started.
+ 
+---
+ 
+#### GetComboState
+No inputs.
+**Output:** CombatState (E_CombatState enum, default: Idle)
+ 
+> Returns the implementing actor's current combat/combo state. Default stub returns Idle.
+ 
+---
+ 
+#### InterruptAction
+**Input:** bForce (bool)
+**Output:** bInterrupted (bool)
+ 
+> Attempts to interrupt the implementing actor's current action. bForce bypasses any interrupt resistance. Returns whether the interrupt was successful.
+ 
+---
+ 
+---
+ 
+### BPI_Damageable (Interface)
+**Parent Class:** Interface
+**Location:** CombatSystem/Core/Interfaces
+ 
+#### Functions
+ 
+| Function | Inputs | Outputs |
+|---|---|---|
+| TakeDamage | DamageInfo (S_DamageInfo) | WasDamaged (bool) |
+| Die | Killer (Actor) | — |
+| GetCurrentHealth | — | Health (float, default: 0.0) |
+| GetMaxHealth | — | MaxHealth (float, default: 0.0) |
+| bIsAlive | — | bIsAlive (bool) |
+ 
+#### TakeDamage
+**Input:** DamageInfo (S_DamageInfo struct)
+**Output:** WasDamaged (bool)
+ 
+> Applies damage to the implementing actor using the full S_DamageInfo struct. Returns whether damage was actually dealt.
+ 
+---
+ 
+#### Die
+**Input:** Killer (Actor)
+No outputs.
+ 
+> Triggers the death sequence on the implementing actor, passing the actor responsible for the kill.
+ 
+---
+ 
+#### GetCurrentHealth
+No inputs.
+**Output:** Health (float, default: 0.0)
+ 
+> Returns the implementing actor's current health value.
+ 
+---
+ 
+#### GetMaxHealth
+No inputs.
+**Output:** MaxHealth (float, default: 0.0)
+ 
+> Returns the implementing actor's maximum health value.
+ 
+---
+ 
+#### bIsAlive
+No inputs.
+**Output:** bIsAlive (bool)
+ 
+> Returns whether the implementing actor is currently alive.
+ 
+---
+ 
+---
+ 
+### BPI_Targetable (Interface)
+**Parent Class:** Interface
+**Location:** CombatSystem/Core/Interfaces
+ 
+#### Functions
+ 
+| Function | Inputs | Outputs |
+|---|---|---|
+| GetTargetLocation | — | TargetLocation (Vector, default: 0,0,0) |
+| CanBeTargeted | bTargeted (bool) | — |
+ 
+#### GetTargetLocation
+No inputs.
+**Output:** TargetLocation (Vector, default: 0.0, 0.0, 0.0)
+ 
+> Returns the world location the lock-on system should aim at on this actor (e.g. a target socket or bone position).
+ 
+---
+ 
+#### CanBeTargeted
+**Input:** bTargeted (bool)
+No outputs.
+ 
+> Notifies the implementing actor that it is being targeted (true) or detargeted (false). Used to drive target indicator UI or state changes.
+ 
+---
+ 
+---
+ 
+### BPI_WeaponUser (Interface)
+**Parent Class:** Interface
+**Location:** CombatSystem/Core/Interfaces
+ 
+#### Functions
+ 
+| Function | Inputs | Outputs |
+|---|---|---|
+| EquipWeapon | WeaponData (S_WeaponData) | bSuccess (bool) |
+| UnequipWeapon | — | bSuccess (bool) |
+| GetCurrentWeapon | — | WeaponData (S_WeaponData) |
+ 
+#### EquipWeapon
+**Input:** WeaponData (S_WeaponData struct)
+**Output:** bSuccess (bool)
+ 
+> Equips a weapon on the implementing actor using the provided weapon data. Returns whether the equip succeeded.
+ 
+---
+ 
+#### UnequipWeapon
+No inputs.
+**Output:** bSuccess (bool)
+ 
+> Removes the currently equipped weapon from the implementing actor. Returns whether the unequip succeeded.
+ 
+---
+ 
+#### GetCurrentWeapon
+No inputs.
+**Output:** WeaponData (S_WeaponData struct)
+ 
+> Returns the S_WeaponData struct for the implementing actor's currently equipped weapon.
+ 
+---
+ 
+---
+ 
+### S_WeaponData (Struct)
+**Location:** CombatSystem/Data/Structures
+> Row type used by DT_TestWeapon. Fields revealed by data table inspection.
+ 
+| Field | Type | Note |
+|---|---|---|
+| WeaponID | Name | |
+| WeaponName | Name | |
+| WeaponClass | E_WeaponClass (enum) | e.g. StraightSword |
+| WeaponMesh | Skeletal Mesh | |
+| SocketName | Name | Socket to attach weapon to on character |
+| LightAttack | Array of S_AttackData | Combo chain for light attacks |
+| HeavyAttack | Array of S_AttackData | Combo chain for heavy attacks |
+| BlockPercentage | Float | Damage reduction while blocking (0.0–1.0) |
+| StaminaCostPerBlock | Float | Stamina drained per blocked hit |
+| WeaponWeight | Float | |
+ 
+---
+ 
+### S_AttackData (Struct)
+**Location:** CombatSystem/Data/Structures
+> Element type used inside S_WeaponData LightAttack / HeavyAttack arrays. 15 members per entry.
+ 
+| Field | Type | Note |
+|---|---|---|
+| AttackName | Name | Identifier for this attack in the combo |
+| AttackType | E_AttackType (enum) | e.g. Light, Heavy |
+| AttackMontage | Anim Montage | Montage to play for this attack |
+| Damage | Float | |
+| PoiseDamage | Float | |
+| StaminaCost | Float | |
+| ComboIndex | Int | Position in the combo chain (0-based) |
+| NextComboAttackIndex | Int | Index of next attack; -1 = end of chain |
+| ComboWindowStart | Float | Normalised time when next input is accepted |
+| ComboWindowEnd | Float | Normalised time when combo window closes |
+| CanBeCanceled | Bool | Whether this attack can be cancelled |
+| CancelWindowStart | Float | Normalised time cancel window opens |
+| CancelWindowEnd | Float | Normalised time cancel window closes |
+| MovementSpeedMultiplier | Float | Applied to movement during this attack |
+| RotationSpeedMultiplier | Float | Applied to rotation during this attack |
+ 
+---
+ 
+### DT_TestWeapon (Data Table)
+**Row Type:** S_WeaponData
+**Location:** CombatSystem/Data/DataTables
+ 
+#### Row: TestSword
+ 
+**Weapon fields:**
+| Field | Value |
+|---|---|
+| WeaponID | TestSword |
+| WeaponName | Test Sword |
+| WeaponClass | StraightSword |
+| WeaponMesh | SK_Blade_BlackKnight |
+| SocketName | Weapon_R |
+| BlockPercentage | 0.5 |
+| StaminaCostPerBlock | 5.0 |
+| WeaponWeight | 5.0 |
+ 
+**LightAttack (4 entries):**
+ 
+| Field | Index 0 | Index 1 | Index 2 | Index 3 |
+|---|---|---|---|---|
+| AttackName | LightAttack1 | LightAttack2 | Light | Light |
+| AttackType | Light | Light | Light | Light |
+| AttackMontage | Anim_CSATL1_01_Montage | Anim_CSATLL_02_Montage | Anim_CSATLL_03_Montage | Anim_CSATLL_04_Montage |
+| Damage | 20.0 | 20.0 | 20.0 | 20.0 |
+| PoiseDamage | 15.0 | 15.0 | 15.0 | 15.0 |
+| StaminaCost | 20.0 | 20.0 | 20.0 | 20.0 |
+| ComboIndex | 0 | 1 | 2 | 3 |
+| NextComboAttackIndex | 1 | 2 | 3 | -1 |
+| ComboWindowStart | 0.5 | 0.5 | 0.5 | 0.5 |
+| ComboWindowEnd | 0.8 | 0.8 | 0.8 | 0.8 |
+| CanBeCanceled | false | false | false | false |
+| CancelWindowStart | 0.0 | 0.0 | 0.0 | 0.0 |
+| CancelWindowEnd | 0.0 | 0.0 | 0.0 | 0.0 |
+| MovementSpeedMultiplier | 1.0 | 1.0 | 1.0 | 1.0 |
+| RotationSpeedMultiplier | 0.3 | 0.3 | 0.3 | 0.3 |
+ 
+**HeavyAttack:** 0 entries (empty array)
+ 
+> 4-hit light combo chain. Each hit: 20 damage, 15 poise damage, 20 stamina cost. Combo window 0.5–0.8 normalised time. Index 3 has NextComboAttackIndex = -1 (end of chain). No heavy attacks defined yet.
+ 
+---
+ 
+### Known Issues (fixing at end)
+- ERROR on Set Value as Object — Get Target Actor node uses invalid target (purged)
+- Compiler warning: blueprint is not BTS_DetectPlayer_C, Target must have connection
+ 
