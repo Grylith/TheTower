@@ -3765,3 +3765,20 @@ RoomRoot
 9. **Print String** `"Boss Spawned Successfully"` *(Dev Only)*
  
 ---
+ 
+#### OnBossDefeated (Function)
+**Graph:** BP_Room_Boss > OnBossDefeated
+ 
+**Logic:**
+1. **Print String** — `"Boss Defeated"` *(Dev Only)*
+2. **SET** `Enemies Alive` = 0
+3. **Print String** — `"EnemiesAlive set"` *(Dev Only)*
+4. **SET** `Room State` = `Cleared`
+5. **Print String** — `"RoomState set"` *(Dev Only)*
+6. **Get All Actors Of Class** (BP_DungeonGenerator) → **GET** [0]
+7. **On Floor Complete** (Target: BP_DungeonGenerator)
+8. **Print String** — `"Floor Complete!"` *(Dev Only)*
+ 
+> Called by the boss when it dies. Clears the room state and directly calls OnFloorComplete on the generator (bypasses OnRoomCompleted since boss rooms end the floor).
+ 
+---
