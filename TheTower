@@ -3340,3 +3340,20 @@ DoorRoot (Scene Component)
 > Only opens if Unlocked. Hides the door mesh, turns the light blue, then triggers the room transition.
  
 ---
+ 
+#### TransitionToNextRoom (Function)
+**Graph:** BP_DoorActor > TransitionToNextRoom
+ 
+**Logic:**
+1. **Get All Actors Of Class**
+   - Actor Class: BP_DungeonGenerator
+   - Out Actors → **GET** [0] (first element)
+2. **Is Valid** (Input Object: BP_DungeonGenerator reference)
+   - **Is Valid** → **On Room Completed** (Target: BP_DungeonGenerator)
+     → **Print String** — `"Notifying generator"` *(Development Only)*
+   - **Is Not Valid** → **Print String** — `"ERROR: No generator found"` *(Development Only)*
+     → **Return Node**
+ 
+> Finds the BP_DungeonGenerator in the level and calls On Room Completed on it. Prints an error and exits early if no generator is found.
+ 
+---
