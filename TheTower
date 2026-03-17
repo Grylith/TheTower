@@ -3628,3 +3628,13 @@ GeneratorRoot (Scene Component)
 > Cleans up the active room and all remaining enemies/bosses, increments the floor counter, then starts the next floor.
  
 ---
+ 
+#### EnableTransition (Function)
+**Graph:** BP_DungeonGenerator > EnableTransition
+ 
+**Logic:**
+1. **SET** `bCanTransition` = true
+ 
+> Called by the timer in SpawnNextRoom (2s delay) to allow the player to trigger the next room transition.
+ 
+---
