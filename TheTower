@@ -3433,3 +3433,25 @@ GeneratorRoot (Scene Component)
 2. **Start Floor** (Target: self)
  
 ---
+ 
+#### GetFloorBandData (Function)
+**Graph:** BP_DungeonGenerator > GetFloorBandData
+**Access:** Public
+**Output:** Output_Get (S_FloorBandData)
+ 
+**Logic:**
+1. Compute band index from `Current Floor Number` using integer math (divides by 10 to group floors into bands)
+2. **Append** — builds row name: `"Band_"` + computed band index (e.g. `"Band_0"`, `"Band_1"`)
+3. **Branch** — Condition: `Current Floor Number >= 90`
+   - **True** (final band) → **Get Data Table Row** (DT_FloorBands)
+     - Row Name: computed row name
+     - **Row Found** → **SET** `CurrentBandData` = Out Row → **Return Node** (Output_Get: CurrentBandData)
+     - **Row Not Found** → **Print String** `"ERROR: Band row not found"` *(Development Only)*
+   - **False** (standard band) → **Get Data Table Row** (DT_FloorBands)
+     - Row Name: computed row name
+     - **Row Found** → **SET** `CurrentBandData` = Out Row → **Return Node** (Output_Get: CurrentBandData)
+     - **Row Not Found** → **Print String** `"ERROR: Band row not found"` *(Development Only)*
+ 
+> Looks up the current floor's band data from DT_FloorBands using a row name built from the floor number (e.g. floor 1-9 = Band_0, 10-19 = Band_1). Floors 90+ use a separate branch for the final band cap.
+ 
+---
