@@ -3455,3 +3455,29 @@ GeneratorRoot (Scene Component)
 > Looks up the current floor's band data from DT_FloorBands using a row name built from the floor number (e.g. floor 1-9 = Band_0, 10-19 = Band_1). Floors 90+ use a separate branch for the final band cap.
  
 ---
+ 
+#### RollRoomSequence (Function)
+**Graph:** BP_DungeonGenerator > RollRoomSequence
+ 
+**Logic:**
+1. **CLEAR** Room Sequence array
+2. **Random Integer in Range** (Min: MinRoomsBeforeBoss, Max: MaxRoomsBeforeBoss) → **SET** Total Rooms
+3. **Print String** — `"Total Number of Rooms: [Total Rooms]"` *(Development Only)*
+4. **For Loop** (0 to Total Rooms - 1)
+   - Loop Body → **ADD** `Combat` to Room Sequence
+5. **SET** Num Loot Rooms = **Random Integer in Range** (Min: 1, Max: 2)
+6. **For Loop** (0 to Num Loot Rooms - 1) — inserts loot rooms at random positions
+   - **SET** Insert Index = **Random Integer in Range** (Min: 1, Max: Room Sequence LENGTH - 1)
+   - **INSERT** `Loot` at Insert Index in Room Sequence
+7. After loot loop **Completed** → **Branch**: `Room Sequence LENGTH >= 4`
+   - **True** (enough rooms for a save point):
+     - **SET** Insert Index = **Random Integer in Range** (Min: 2, Max: Room Sequence LENGTH - 2)
+     - **INSERT** `SavePoint` at Insert Index in Room Sequence
+     - **ADD** `Boss` to Room Sequence
+   - **False** (not enough rooms):
+     - **Print String** — `"HellWARNING: Not enough rooms to place SavePoint"` *(Development Only)*
+     - **ADD** `Boss` to Room Sequence
+ 
+> Builds the full room sequence for a floor: fills with Combat rooms, splices in 1-2 Loot rooms at random positions, inserts a SavePoint in the middle if there's room, then appends the Boss at the end.
+ 
+---
