@@ -3526,3 +3526,39 @@ GeneratorRoot (Scene Component)
 > Simple switch that maps each E_RoomType enum value to the corresponding room class variable.
  
 ---
+ 
+#### SpawnNextRoom (Function)
+**Graph:** BP_DungeonGenerator > SpawnNextRoom
+ 
+**Logic:**
+1. **SET** `bCanTransition` = false
+2. **Branch** — Condition: `CurrentRoomIndex < LENGTH of Room Sequence`
+   - **False** → **Print String** `"ERROR: No more rooms in sequence"` *(Dev Only)* → **Return Node**
+   - **True** →
+3. **GET** `Room Sequence[CurrentRoomIndex]` → **SET** Next Room Type
+4. **Get Room Class for Type** (Target: self, In Room Type: Next Room Type) → **SET** Next Room Class
+5. **Is Valid Class** (Class: Next Room Class)
+   - **False** → **Print String** `"ERROR: Room class not assigned"` *(Dev Only)* → **Return Node**
+   - **True** →
+6. **Build Room Spawn Data** (Target: self, In Room Type: Next Room Type) → **SET** Spawn Data
+7. **Spawn Actor** (Class: Next Room Class, Location: RoomSpawnLocation, Rotation: 0,0,0, Scale: 1,1,1, Collision: Default) → Spawned Room Actor
+8. **SET** Spawned Room Actor
+9. **Is Valid** (Object: Spawned Room Actor)
+   - **False** → **Print String** `"ERROR: Room failed to spawn"` *(Dev Only)* → **Return Node**
+   - **True** → **SET** Active Room = Spawned Room Actor
+10. **Cast To BP_RoomBase** (Object: Active Room)
+    - **Cast Failed** → **Print String** `"ERROR: Room failed to spawn"` *(Dev Only)* → **Return Node**
+11. **Setup Room** (Target: BP_RoomBase, In Spawn Data: Spawn Data)
+12. **Cast To BP_DoorActor** (from room's child actor) → Door Actor
+13. **Get Room Class for Type** (In Room Type: `Room Sequence[CurrentRoomIndex]`) → **SET** Next Room Class (on door)
+14. **Build Room Spawn Data** (In Room Type: `Room Sequence[CurrentRoomIndex]`) → **SET** Next Room Spawn Data (on door)
+15. **SET** `Current Room Index` = Current Room Index + 1
+16. **Set Timer by Function Name**
+    - Object: self
+    - Function Name: `"EnableTransition"`
+    - Time: 2.0
+    - Looping: false
+ 
+> Validates the sequence has rooms remaining, spawns the next room at RoomSpawnLocation, sets it up with generated spawn data, wires the door to the following room's class and data, increments the room index, then enables transition after a 2 second delay.
+ 
+---
