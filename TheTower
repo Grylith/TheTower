@@ -3935,3 +3935,93 @@ BP_Room_Combat (Self)
 2. **Notify Room Cleared** (Target: self)
 
 ---
+
+---
+
+## BP_Room_Loot
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Loot room — no enemies; doors open immediately after a short delay. Used for reward/chest rooms between combat floors.
+
+---
+
+### Components
+
+```
+BP_Room_Loot (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises room with spawn data |
+| OnRoomCleared | Called when room is cleared |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Room Type | Loot |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| On Room Finished | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **SET** `Enemies Alive` = 0
+3. **Delay** (Duration: 1.0s)
+4. **On Room Cleared** (Target: self)
+5. **Print String** — `"Loot Room — No enemies, doors open immediately"` *(Dev Only)*
+
+> Loot rooms have no enemies, so OnRoomCleared is called automatically after a 1-second delay on BeginPlay.
+
+---
