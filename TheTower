@@ -2806,3 +2806,27 @@ No inputs.
 | CanBeBlocked | true |
  
 ---
+ 
+### S_DodgeData (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| DodgeMontage | Anim Montage | Montage to play for the dodge |
+| StaminaCost | Float | Stamina consumed on dodge |
+| IFrameStart | Float | Normalised time invincibility frames begin |
+| IFrameEnd | Float | Normalised time invincibility frames end |
+| DodgeDistance | Float | Distance covered by the dodge |
+| RecoveryTime | Float | Time before next action is allowed |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| DodgeMontage | AM_Dodge_F |
+| StaminaCost | 30.0 |
+| IFrameStart | 0.1 |
+| IFrameEnd | 0.4 |
+| DodgeDistance | 400.0 |
+| RecoveryTime | 1.0 |
+ 
+---
