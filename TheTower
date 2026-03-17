@@ -2968,3 +2968,24 @@ No inputs.
 > Builds a "CurrentHealth/MaxHealth" display string for the HUD health label.
  
 ---
+ 
+#### GetText_Stamina (Pure Function)
+**Graph:** WBP_PlayerHUD > GetText_Stamina
+**Output:** Text (e.g. "60/100")
+ 
+**Logic:**
+1. **Get Current Stamina** (Target: Stats Component)
+   - Used output: Current Stamina
+2. **Get Base Stats** (Target: Stats Component)
+   - Used output: Base Stat Max Stamina
+3. **Append**
+   - A: Current Stamina
+   - B: `"/"`
+   - C: Base Stat Max Stamina
+4. **To Text (String)** — converts appended string to Text
+   - In String: Append Return Value
+   - Return Value → **Return Node**
+ 
+> Same pattern as GetText_Health but for stamina — builds "CurrentStamina/MaxStamina" display string.
+ 
+---
