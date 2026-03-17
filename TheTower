@@ -4345,3 +4345,15 @@ BP_RoomBase (Self)
 > Iterates once per enemy count, picking a random unique spawn point each iteration (removing used points from the pool). Enemy class is selected randomly from the `EnemyTypes` array in SpawnData.
 
 ---
+
+#### SpawnProps (Function)
+**Graph:** BP_RoomBase > SpawnProps
+
+**Logic:**
+1. **Get World Location** (Target: ChestSpawnPoint)
+2. **Append** — `"Chest spawned at: "` + [world location vector]
+3. **Print String** — appended string *(Dev Only)*
+
+> Currently a stub — no props are actually spawned. Logs the ChestSpawnPoint world location for debugging.
+
+---
