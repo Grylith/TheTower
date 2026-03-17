@@ -3738,3 +3738,30 @@ RoomRoot
 4. **Print String** — `"Boss Room Initialized"` *(Development Only)*
  
 ---
+ 
+#### SpawnBoss (Function)
+**Graph:** BP_Room_Boss > SpawnBoss
+ 
+**Logic:**
+1. **Branch** — Condition: `bBossSpawned`
+   - **True** → **Return Node** (already spawned, exit early)
+   - **False** →
+2. **SET** `bBossSpawned` = true
+3. **Spawn Actor**
+   - Class: BossClass
+   - Location: **Get World Location** (BossSpawn) + offset (X: 0, Y: 0, Z: 100)
+   - Rotation: **Get World Rotation** (BossSpawn)
+   - Scale: (1.0, 1.0, 1.0)
+   - Collision: Always Spawn, Ignore Collisions
+4. **SET** `Spawned Boss` = Return Value
+5. **Is Valid** (Input Object: Spawned Boss)
+   - **Is Not Valid** → **Print String** `"ERROR: Boss failed to spawn"` *(Dev Only)*
+   - **Is Valid** →
+6. **SET** `Enemies Alive` = 1
+7. **Cast To BP_TestBoss** (Object: Spawned Boss)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+8. **SET** `Owning Room` = self (Target: As BP_TestBoss)
+9. **Print String** `"Boss Spawned Successfully"` *(Dev Only)*
+ 
+---
