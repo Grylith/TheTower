@@ -3726,3 +3726,15 @@ RoomRoot
 - **Event Tick** → **Parent_Tick** — disabled (no logic yet)
  
 ---
+ 
+#### SetupRoom (Function)
+**Graph:** BP_Room_Boss > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+ 
+**Logic:**
+1. **Parent: SetupRoom** (In Spawn Data: In Spawn Data) — calls parent implementation
+2. **SET** `Enemies Alive` = 1 (the boss counts as 1 enemy)
+3. **Spawn Boss** (Target: self)
+4. **Print String** — `"Boss Room Initialized"` *(Development Only)*
+ 
+---
