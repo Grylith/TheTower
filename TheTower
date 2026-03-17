@@ -4662,3 +4662,114 @@ None
 | bIsFinalRoom | Boolean | false |
 
 ---
+
+---
+
+## BP_ThirdPersonCharacter
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** The player character. Handles input, delegates to component systems (Combat, Inventory, Stats, Weapon, LockOn), and owns the HUD.
+
+---
+
+### Components
+| Name | Type |
+|---|---|
+| CameraBoom | Spring Arm Component |
+| FollowCamera | Camera Component |
+| InventoryComponent | BP_InventoryComponent |
+| LockOnComponent | BP_LockOnComponent |
+| WeaponComponent | BP_WeaponComponent |
+| CombatComponent | BP_CombatComponent |
+| StatsComponent | BP_StatsComponent |
+
+---
+
+### Variables
+| Category | Name | Type |
+|---|---|---|
+| Camera | FollowCamera | Camera Component ref |
+| Camera | CameraBoom | Spring Arm ref |
+| Components | InventoryComponent | BP_InventoryComponent ref |
+| Components | LockOnComponent | BP_LockOnComponent ref |
+| Components | WeaponComponent | BP_WeaponComponent ref |
+| Components | CombatComponent | BP_CombatComponent ref |
+| Components | StatsComponent | BP_StatsComponent ref |
+| — | PlayerHUD | WBP_Player ref |
+| — | InitCombatTimerHandle | Timer Handle |
+| — | EquippedWeapon | BP_Weapon ref |
+
+---
+
+### Interfaces
+- **BPI_Touch_Interface:** Touch Jump End, Touch Jump Start, Secondary Thumbstick, Primary Thumbstick
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| Move | Handles movement input |
+| Aim | Handles aim/camera input |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Skeletal Mesh | SKM_Quinn_Simple |
+| Mesh Location | (0.0, 0.0, -89.0) |
+| Mesh Rotation | (-6.0°, 0.0°, 270.0°) |
+| Animation Mode | Use Animation Blueprint |
+| Anim Class | ABP_Quanim |
+| Materials | M_Quinn_01, M_Quinn_02 |
+| Crouched Eye Height | 32.0 |
+| Base Eye Height | 64.0 |
+| Player HUD | None |
+| Start with Tick Enabled | true |
+
+---
+
+### Event Graph
+
+**IA_Jump (EnhancedInputAction):**
+- **Triggered** → **Branch** (Condition: `CombatComponent → Is Dodging`)
+  - **True** → **Jump** (Target: self)
+  - **False** → **Stop Jumping** (Target: self)
+- **Event Touch Jump Start** *(BPI Touch Interface)* → same as Triggered path
+- **Event Touch Jump End** *(BPI Touch Interface)* → **Stop Jumping** (Target: self)
+
+---
+
+**IA_Dodge (EnhancedInputAction):**
+- **Triggered** →
+  1. **Can Interrupt Attack** (Target: CombatComponent)
+  2. **Branch** (Condition: Can Interrupt)
+     - **True** → **Interrupt Attack** (CombatComponent)
+     - **False** → (continues without interrupting)
+  3. **Try Execute Dodge** (Target: CombatComponent, Direction: **Normalize**(**Get Velocity**(self), Tolerance: 0.0001))
+     - **Success=True** → end
+     - **Success=False** → **Add to Input Buffer** (Target: CombatComponent, Attack Type: Dodge)
+
+---
+
+**IA_Block (EnhancedInputAction):**
+- **Started** →
+  1. **Can Interrupt Attack** (Target: CombatComponent)
+  2. **Branch** (Condition: Can Interrupt)
+     - **True** → **Interrupt Attack** (CombatComponent) → **Start Blocking** (CombatComponent)
+     - **False** → end
+- **Completed** → **Stop Blocking** (Target: CombatComponent)
+
+---
+
+**IA_Attack (EnhancedInputAction):**
+- **Triggered** →
+  1. **Try Execute Attack** (Target: **Get Component by Class**(self, BP_CombatComponent), Attack Type: `Light`)
+  2. **Branch** (Condition: Success)
+     - **True** → end
+     - **False** → **Add to Input Buffer** (Target: CombatComponent, Attack Type: Light)
+
+---
