@@ -2934,3 +2934,16 @@ No inputs.
      - Return Value: `1.0` (defaults to full if no component)
  
 ---
+ 
+#### Get_Stamina_ProgressBar_Percent (Pure Function)
+**Graph:** WBP_PlayerHUD > Get_Stamina_ProgressBar_Percent
+**Output:** Float (0.0–1.0)
+ 
+**Logic:**
+1. **Get Stamina Percent** (Target: BP Stats Component)
+   - Target: Stats Component
+   - Percent → **Return Node** (returns stamina as float)
+ 
+> Simpler than the health version — no validity check, calls Get Stamina Percent directly.
+ 
+---
