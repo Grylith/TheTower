@@ -4611,3 +4611,17 @@ None
 | Cleared | Room has been cleared; doors are unlocked |
 
 ---
+
+## E_RoomType
+
+**Type:** Enum
+**Purpose:** Defines the type of a room, used by the dungeon generator to select the correct room class and configure spawn behaviour.
+
+| Value | Description |
+|---|---|
+| Combat | Standard combat room with enemies |
+| Loot | Reward room with a guaranteed chest, no enemies |
+| SavePoint | Save point room where the player can spend Essences |
+| Boss | Boss room; ends the floor on clear |
+
+---
