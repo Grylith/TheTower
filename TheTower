@@ -4367,3 +4367,13 @@ BP_RoomBase (Self)
 > Currently a stub — no chest actor is actually spawned yet.
 
 ---
+
+#### SpawnTrap (Function)
+**Graph:** BP_RoomBase > SpawnTrap
+
+**Logic:**
+1. **Print String** — `"Trap spawned"` *(Dev Only)*
+
+> Currently a stub — no trap actor is actually spawned yet.
+
+---
