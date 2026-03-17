@@ -2694,3 +2694,17 @@ No inputs.
 | Dodge | Dodge action |
  
 ---
+ 
+### E_CombatState (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Idle | Default state, no combat action |
+| Attacking | Currently performing an attack |
+| Blocking | Currently blocking |
+| Dodging | Currently performing a dodge |
+| Staggered | Hit and interrupted |
+| Dead | Character is dead |
+ 
+---
