@@ -3117,3 +3117,92 @@ No inputs.
 - Event Tick — disabled (no logic yet)
  
 ---
+ 
+---
+ 
+## Weapons
+ 
+---
+ 
+### BP_Weapon_BlackKnightSword (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** CombatSystem/Weapons
+ 
+#### Components
+```
+DefaultSceneRoot
+└── WeaponMesh (Skeletal Mesh)
+    └── WeaponHitBox (Box Collision)
+```
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| Other Actor | Actor | Last actor that overlapped the hitbox |
+| Previous_Start_Location | Vector | Weapon tip start position from last tick |
+| Previous_End_Location | Vector | Weapon tip end position from last tick |
+| AlreadyHitActors | Array of Actor | Actors hit during current swing (prevents multi-hit) |
+| bCanTraceAttack | Boolean | Whether the weapon is actively tracing |
+| Impact Point | Vector | World position of the last hit |
+| Pawn | EObject Type | Owner pawn reference |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Can Trace Attack | false |
+| Previous Start Location | (0.0, 0.0, 0.0) |
+| Previous End Location | (0.0, 0.0, 0.0) |
+| Impact Point | (0.0, 0.0, 0.0) |
+| Pawn | 1 Array element |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+| Auto Receive Input | Disabled |
+ 
+#### Event Graph
+ 
+##### Event Tick
+1. **Branch** — Condition: `bCanTraceAttack`
+   - **False** → end
+   - **True** → **Sphere Trace For Objects**
+     - Start: Previous_Start_Location
+     - End: Get Socket Location (WeaponMesh, `"Start"`)
+     - Radius: 10.0
+     - Ignore Self: true
+     - Pawn: (owner pawn)
+2. **Break Hit Result** → checks `Hit` pin
+3. **Branch** — Condition: Hit (blocking hit registered)
+   - **False** → end
+   - **True** → **CONTAINS** (Already Hit Actors, Other Actor)
+     - If NOT contains → **ADD** Other Actor to Already Hit Actors
+     - **SET** Impact Point
+     → **On Weapon Hit** (custom event dispatcher)
+       - Target: weapon component
+       - Hit Actor
+       - Hit Location
+ 
+##### On Component Begin Overlap (WeaponHitBox)
+1. **SET** Other Actor ← Overlapped Other Actor
+2. **Branch** — Condition: `Other Actor != Get Owner (self)`
+   - **True** → **Start Attack Trace** (Target: self)
+   - **False** → **Stop Attack Trace** (Target: self)
+ 
+##### StartAttackTrace (Custom Event)
+1. **SET** `bCanTraceAttack` = true
+2. **CLEAR** AlreadyHitActors array
+3. **Get Socket Location** (WeaponMesh, `"Start"`) → **SET** Previous_Start_Location
+4. **Get Socket Location** (WeaponMesh, `"End"`) → **SET** Previous_End_Location
+ 
+##### StopAttackTrace (Custom Event)
+1. **SET** `bCanTraceAttack` = false
+ 
+---
