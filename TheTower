@@ -2919,3 +2919,18 @@ No inputs.
 - Event Tick — disabled (no logic yet)
  
 ---
+ 
+#### Get_Health_ProgressBar_Percent (Pure Function)
+**Graph:** WBP_PlayerHUD > Get_Health_ProgressBar_Percent
+**Output:** Float (0.0–1.0)
+ 
+**Logic:**
+1. **Is Valid** — checks Stats Component
+   - Object: Stats Component
+2. **Branch** — Condition: Is Valid result
+   - **True** → **Get Health Percent** (Target: Stats Component)
+     - Percent → **Return Node** (returns health as float)
+   - **False** → **Return Node**
+     - Return Value: `1.0` (defaults to full if no component)
+ 
+---
