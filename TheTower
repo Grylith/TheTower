@@ -3653,8 +3653,24 @@ RoomRoot
 ├── DoorActor
 ├── DoorSocketRoot
 │   └── DoorSocket_Exit
-└── EnemySpawnRoot
-    └── EnemySpawn_1
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
 ```
  
 #### Variables
