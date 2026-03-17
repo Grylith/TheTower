@@ -2989,3 +2989,42 @@ No inputs.
 > Same pattern as GetText_Health but for stamina — builds "CurrentStamina/MaxStamina" display string.
  
 ---
+ 
+---
+ 
+## Inventory System
+ 
+---
+ 
+### BP_InventoryComponent (Actor Component)
+**Parent Class:** Actor Component
+**Location:** CombatSystem/UI/Inventory
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| Inventory | Array of S_ItemData | The inventory item array |
+| MaxSlots | Integer | Max number of inventory slots |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| AddItem | Adds an item to the inventory (2 overridable) |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Start with Tick Enabled | true |
+| Tick Interval (secs) | 0.0 |
+| Inventory | 0 Array elements |
+| Max Slots | 20 |
+| Component Replicates | false |
+| Auto Activate | false |
+| Is Editor Only | false |
+| Editable when Inherited | true |
+ 
+#### Event Graph
+- Event Begin Play — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
