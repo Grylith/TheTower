@@ -4025,3 +4025,15 @@ BP_Room_Loot (Self)
 > Loot rooms have no enemies, so OnRoomCleared is called automatically after a 1-second delay on BeginPlay.
 
 ---
+
+#### SetupRoom (Function)
+**Graph:** BP_Room_Loot > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+
+**Logic:**
+1. **Parent: SetupRoom** (In Spawn Data: In Spawn Data)
+2. **SET** `Has Chest` = true
+3. **Spawn Chest** (Target: self)
+4. **Print String** — `"Loot Room Loaded — Chest Guaranteed"` *(Dev Only)*
+
+---
