@@ -3357,3 +3357,79 @@ DoorRoot (Scene Component)
 > Finds the BP_DungeonGenerator in the level and calls On Room Completed on it. Prints an error and exits early if no generator is found.
  
 ---
+ 
+---
+ 
+### BP_DungeonGenerator (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** DungeonSystem/Core/Generator
+ 
+#### Components
+```
+GeneratorRoot (Scene Component)
+```
+ 
+#### Variables
+| Category | Name | Type | Note |
+|---|---|---|---|
+| Floor Data | CurrentFloorNumber | Integer | Current floor being generated |
+| Floor Data | RoomSequence | Array of E_RoomType | Sequence of room types for this floor |
+| Floor Data | CurrentRoomIndex | Integer | Index of the current active room |
+| Floor Data | CurrentBandData | S_FloorBandData | Band data for current floor segment |
+| Floor Data | bCanTransition | Boolean | Whether a room transition is allowed |
+| References | ActiveRoom | Actor | Reference to the currently active room |
+| Settings | MinRoomsBeforeBoss | Integer | Minimum rooms before boss spawns |
+| Settings | MaxRoomsBeforeBoss | Integer | Maximum rooms before boss spawns |
+| Settings | FloorBandTable | Data Table | Data table defining floor bands |
+| Settings | RoomClasses | Array of Actor | All available room classes |
+| Settings | CombatRoomClass | Actor | Class to spawn for combat rooms |
+| Settings | LootRoomClass | Actor | Class to spawn for loot rooms |
+| Settings | SavePointRoomClass | Actor | Class to spawn for save point rooms |
+| Settings | BossRoomClass | Actor | Class to spawn for boss rooms |
+| Settings | RoomSpawnLocation | Vector | World location where rooms are spawned |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | |
+| GetFloorBandData | Retrieves band data for the current floor |
+| RollRoomSequence | Randomly generates the room type sequence |
+| BuildRoomSpawnData | Builds spawn data for the next room |
+| GetRoomClassForType | Returns the room class matching a given E_RoomType |
+| SpawnNextRoom | Spawns the next room in the sequence |
+| StartFloor | Initialises and starts generating a floor |
+| OnRoomCompleted | Called by BP_DoorActor when a room is cleared |
+| OnFloorComplete | Called when all rooms on the floor are done |
+| EnableTransition | Enables room transition flag |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Current Floor Number | 1 |
+| Room Sequence | 0 Array elements |
+| Current Room Index | 0 |
+| B Can Transition | false |
+| Min Rooms Before Boss | 8 |
+| Max Rooms Before Boss | 12 |
+| Floor Band Table | None |
+| Room Spawn Location | (0.0, 0.0, 0.0) |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+ 
+##### Event BeginPlay
+1. **Print String** — `"Dungeon Generator Ready"` *(Development Only)*
+2. **Start Floor** (Target: self)
+ 
+---
