@@ -4583,3 +4583,18 @@ None
 | Band_10 | Floors 91-100 | 91 | 100 | 6 | 8 | 0.70 | 0.60 | 0.70 | 1.00 |
 
 ---
+
+---
+
+## E_DoorState
+
+**Type:** Enum
+**Purpose:** Tracks the current state of a door actor.
+
+| Value | Description |
+|---|---|
+| Locked | Door is locked and cannot be opened |
+| Unlocked | Door has been unlocked and can be opened |
+| Opened | Door has been opened |
+
+---
