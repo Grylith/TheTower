@@ -4282,3 +4282,33 @@ BP_RoomBase (Self)
 4. **Print String** — `"BP_RoomBase Ready"` *(Dev Only)*
 
 ---
+
+#### SetupRoom (Function)
+**Graph:** BP_RoomBase > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+
+**Logic:**
+1. **Branch** — Condition: `bRoomInitialized == true`
+   - **True** → **Return Node** (already set up, exit early)
+   - **False** →
+2. **SET** `bRoomInitialized` = true
+3. **SET** `SpawnData` = In Spawn Data — struct fields unpacked and routed:
+   - `Room Type` → **SET** `RoomType`
+   - `Has Loot Chest` → **SET** `bHasChest`
+   - `Has Trap` → **SET** `bHasTrap`
+   - `Enemy Count` → **SET** `EnemiesAlive`
+   - `Enemy Count` → **SET** `TotalEnemiesSpawned`
+4. **SET** `Room State` = `Active`
+5. **Spawn Enemies** (Target: self)
+6. **Spawn Props** (Target: self)
+7. **Branch** — Condition: `bHasChest`
+   - **True** → **Spawn Chest** (Target: self)
+   - **False** → (continue)
+8. **Branch** — Condition: `bHasTrap`
+   - **True** → **Spawn Trap** (Target: self)
+   - **False** → (continue)
+9. **Print String** — `"Room Setup Complete"` *(Dev Only)*
+
+> Base implementation called by all subclass overrides via `Parent: SetupRoom`. Unpacks the spawn data struct, sets room state to Active, then delegates to the individual spawn functions.
+
+---
