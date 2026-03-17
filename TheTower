@@ -4489,3 +4489,55 @@ Default Character components: CapsuleComponent, Mesh (no mesh assigned), Charact
 > Placeholder implementation — boss dies automatically after 5 seconds via a timer. Always destroys self regardless of whether OwningRoom is valid.
 
 ---
+
+---
+
+## BP_TestEnemy
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** Placeholder enemy character. Auto-dies after 5 seconds via a timer, then notifies the room via `OnEnemyDied` — but only if the room is in the `Active` state.
+
+---
+
+### Components
+Default Character components: CapsuleComponent, Mesh (no mesh assigned), CharacterMovement
+
+---
+
+### Variables
+None
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Print String** — `"Test Enemy Spawned"` *(Dev Only)*
+2. **Set Timer by Event** (Event: EnemyDieTimer, Time: 5.0s, Looping: false)
+
+---
+
+**EnemyDieTimer** *(Custom Event):*
+1. **Print String** — `"TIMER FIRED"` *(Dev Only)*
+2. **Get All Actors Of Class** (BP_Room_Base) → **GET** [0]
+3. **Is Valid** (Input Object: room actor)
+   - **Is Not Valid** → **Print String** `"No room found"` *(Dev Only)* → **Destroy Actor** (self)
+   - **Is Valid** →
+4. **Get Display Name** (Object: room actor)
+5. **Append** — `"Room State is: "` + **Enum to String** (room actor's `Room State`)
+6. **Print String** *(Dev Only)* — the appended room state string
+7. **Branch** — Condition: `Room State == Active`
+   - **True** → **On Enemy Died** (Target: room actor as BP_RoomBase) → **Destroy Actor** (self) → **Print String** `"TestEnemy Destroyred"` *(Dev Only)*
+   - **False** → **Destroy Actor** (self) *(silently, room not active)*
+
+> Uses `Get All Actors Of Class` to find the room rather than a stored reference. Only calls `OnEnemyDied` if the room is still Active, preventing stale death notifications.
+
+---
