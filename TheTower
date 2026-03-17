@@ -4598,3 +4598,16 @@ None
 | Opened | Door has been opened |
 
 ---
+
+## E_RoomState
+
+**Type:** Enum
+**Purpose:** Tracks the current state of a room.
+
+| Value | Description |
+|---|---|
+| Locked | Room is locked; player cannot progress |
+| Active | Room is active; enemies are alive |
+| Cleared | Room has been cleared; doors are unlocked |
+
+---
