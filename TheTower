@@ -4815,3 +4815,13 @@ None
 > BeginPlay polls until the anim instance is valid before initialising combat, ensuring the animation blueprint is ready before combat systems start. Weapon is hardcoded to TestSword row from DT_TestWeapons at startup.
 
 ---
+
+#### Aim (Function)
+**Graph:** BP_ThirdPersonCharacter > Aim
+**Inputs:** X Axis (Float), Y Axis (Float)
+
+**Logic:**
+1. **Add Controller Yaw Input** (Target: self, Val: X Axis) *(Left/Right)*
+2. **Add Controller Pitch Input** (Target: self, Val: Y Axis) *(Up/Down)*
+
+---
