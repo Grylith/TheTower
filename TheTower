@@ -4399,3 +4399,20 @@ BP_RoomBase (Self)
 > Decrements the enemy count on each death. Double-checks the count before calling OnRoomCleared to guard against race conditions or duplicate calls.
 
 ---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_RoomBase > OnRoomCleared
+
+**Logic:**
+1. **SET** `Room State` = `Cleared`
+2. **Print String** *(Dev Only)* — **Append**: `"Doors in room count: "` + **LENGTH**(`Doors in Room`)
+3. **For Each Loop** (Array: `Doors in Room`)
+   - **Loop Body** →
+     - **Is Valid** (Input Object: Array Element)
+       - **Is Valid** → **Unlock Door** (Target: Array Element as BP_DoorActor) → **Print String** `"Door Unlocked"` *(Dev Only)*
+       - **Is Not Valid** → **Print String** `"Invalid door reference"` *(Dev Only)*
+   - **Completed** → end
+
+> Base implementation. Sets room state to Cleared then iterates all doors in the room and unlocks each valid one.
+
+---
