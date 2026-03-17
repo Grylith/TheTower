@@ -3828,3 +3828,87 @@ RoomRoot
 > Boss room override — delegates directly to SpawnBoss rather than spawning regular enemies.
 
 ---
+
+---
+
+## BP_Room_Combat
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Combat room — spawns enemies and props; player must defeat all enemies to clear the room.
+
+---
+
+### Components
+
+```
+BP_Room_Combat (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| OnRoomCleared | Called when all enemies are defeated |
+
+---
+
+### Event Graph
+- **Event BeginPlay** (present)
+- **Event ActorBeginOverlap** (present)
+- **Event Tick** (present)
+- **NotifyRoomCleared** (custom event)
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| On Room Finished | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Room Type | Combat |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
