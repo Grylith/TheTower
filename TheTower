@@ -2679,3 +2679,18 @@ No inputs.
 - ERROR on Set Value as Object — Get Target Actor node uses invalid target (purged)
 - Compiler warning: blueprint is not BTS_DetectPlayer_C, Target must have connection
  
+ 
+---
+ 
+### E_AttackType (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Light | Standard light attack |
+| Heavy | Standard heavy attack |
+| Charged | Charged attack |
+| Special | Special attack |
+| Dodge | Dodge action |
+ 
+---
