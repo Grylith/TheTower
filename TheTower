@@ -3206,3 +3206,82 @@ DefaultSceneRoot
 1. **SET** `bCanTraceAttack` = false
  
 ---
+ 
+---
+ 
+## Dungeon System
+ 
+---
+ 
+### BP_DoorActor (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** DungeonSystem/Core/Doors
+ 
+#### Components
+```
+DoorRoot (Scene Component)
+├── DoorFrame (Static Mesh)
+├── DoorLight (Light)
+├── DoorMesh (Static Mesh)
+└── TriggerZone (Box Collision)
+```
+ 
+#### Variables
+| Category | Name | Type | Note |
+|---|---|---|---|
+| Door State | DoorState | E_DoorState | Current state of the door |
+| Room Setup | NextRoomClass | Actor | Class of the next room to spawn |
+| Room Setup | NextRoomSpawnData | S_RoomSpawnData | Spawn data for the next room |
+| References | OwningRoom | BP_RoomBase | The room this door belongs to |
+| References | NewRoom | Actor | Reference to the spawned next room |
+| State | bIsTransitioning | Boolean | Whether a room transition is in progress |
+| Settings | DoorOpenOffset | Vector | Offset applied when door opens |
+| Settings | TransitionDelay | Float | Delay before transitioning to next room |
+| Settings | DoorStartLocation | Vector | Initial world location of the door mesh |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | Sets up door on placement |
+| LockDoor | Sets door state to Locked |
+| UnlockDoor | Sets door state to Unlocked |
+| OpenDoor | Opens the door (plays animation/movement) |
+| TransitionToNextRoom | Handles room transition logic |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Door State | Locked |
+| Is Transitioning | false |
+| Door Open Offset | (0.0, 0.0, 0.0) |
+| Transition Delay | 1.0 |
+| Door Start Location | (0.0, 0.0, 0.0) |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+ 
+##### Event BeginPlay
+1. **Lock Door** (Target: self)
+ 
+##### On Component Begin Overlap (TriggerZone)
+1. **Cast To BP_ThirdPersonCharacter** (Object: Other Actor)
+2. **Branch** — Condition: `Door State == Unlocked`
+   - **True** → **Open Door** (Target: self)
+   - **False** → end
+ 
+##### EnableTriggerZone (Custom Event)
+1. **Set Collision Enabled** (Target: TriggerZone)
+   - New Type: Query Only (No Physics Collision)
+ 
+---
