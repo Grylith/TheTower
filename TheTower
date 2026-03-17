@@ -2721,3 +2721,17 @@ No inputs.
 | Holy | Holy elemental damage |
  
 ---
+ 
+### E_WeaponClass (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Unarmed | No weapon equipped |
+| StraightSword | Standard one-handed sword |
+| GreatSword | Large two-handed sword |
+| Dagger | Fast short blade |
+| Spear | Long reach polearm |
+| Axe | Axe weapon type |
+ 
+---
