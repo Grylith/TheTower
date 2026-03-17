@@ -4193,17 +4193,29 @@ BP_RoomBase (Self)
 ### Variables
 | Category | Name | Type |
 |---|---|---|
-| Components | (component refs) | |
-| Room Setup | Room Type | E_RoomType |
-| Room Setup | Room State | E_RoomState |
-| Room Setup | Has Chest | Boolean |
-| Room Setup | Has Trap | Boolean |
-| Room Setup | Chest Class | Class Reference |
-| Room Setup | Room Initialized | Boolean |
-| Tracking | Enemies Alive | Integer |
-| Tracking | Total Enemies Spawned | Integer |
-| References | Doors in Room | Array of BP_DoorActor |
-| References | Owning Room | BP_RoomBase |
+| Room Setup | RoomType | E_RoomType |
+| Room Setup | RoomState | E_RoomState |
+| Room Setup | SpawnData | S_RoomSpawnData |
+| Room Setup | bHasChest | Boolean |
+| Room Setup | bHasTrap | Boolean |
+| Room Setup | ChestClass | Actor (class reference) |
+| Room Setup | bRoomInitialized | Boolean |
+| Tracking | EnemiesAlive | Integer |
+| Tracking | TotalEnemiesSpawned | Integer |
+| References | DoorsInRoom | Array of BP_DoorActor |
+| References | SpawnedEnemies | Array of Actor |
+| References | SpawnedProps | Array of Actor |
+| Components | DoorActor | Scene Component |
+| Components | ChestSpawnPoint | Scene Component |
+| Components | DoorSocketRoot | Scene Component |
+| Components | DoorSocket_Exit | Scene Component |
+| Components | EnemySpawnRoot | Scene Component |
+| Components | EnemySpawn_1–6 | Scene Component |
+| Components | PropSpawnRoot | Scene Component |
+| Components | PropSpawn_1–8 | Scene Component |
+| Components | RoomBounds | Scene Component |
+| Components | FloorMesh | Scene Component |
+| Components | RoomRoot | Scene Component |
 
 ---
 
