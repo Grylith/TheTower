@@ -3481,3 +3481,32 @@ GeneratorRoot (Scene Component)
 > Builds the full room sequence for a floor: fills with Combat rooms, splices in 1-2 Loot rooms at random positions, inserts a SavePoint in the middle if there's room, then appends the Boss at the end.
  
 ---
+ 
+#### BuildRoomSpawnData (Function)
+**Graph:** BP_DungeonGenerator > BuildRoomSpawnData
+**Input:** In Room Type (E_RoomType)
+**Output:** S_RoomSpawnData
+ 
+**Logic:**
+1. **Get Floor Band Data** (Target: self)
+   - Used outputs: Min Enemies Per Room, Max Enemies Per Room, Loot Chest Chance, Trap Chance, Prop Density Min, Prop Density Max
+2. **Random Integer in Range** (Min: Min Enemies Per Room, Max: Max Enemies Per Room) → **SET** Rand Enemy Count
+3. **Random Float in Range** (Min: Prop Density Min, Max: Prop Density Max) → **SET** Rand Prop Density
+4. **Random Float** `<=` Loot Chest Chance → **SET** Has Loot Chest Result (Boolean)
+5. **Random Float** `<=` Trap Chance → **SET** Has Trap Result (Boolean)
+6. **Make Array** `[BP_TestEnemy]` → Enemy Types array
+7. **Literal Enum E_RoomType** `Boss` `==` In Room Type → Is Final Room (Boolean)
+8. **Make S Room Spawn Data**
+   - Room Type: In Room Type
+   - Floor Number: Current Floor Number
+   - Enemy Count: Rand Enemy Count
+   - Enemy Types: [BP_TestEnemy]
+   - Has Loot Chest: Has Loot Chest Result
+   - Has Trap: Has Trap Result
+   - Prop Density: Rand Prop Density
+   - Is Final Room: `In Room Type == Boss`
+9. **SET** Out Data = Make S Room Spawn Data result → **Return Node**
+ 
+> Samples the current floor band to roll all room parameters, then packages them into an S_RoomSpawnData struct. Boss rooms are flagged as the final room automatically.
+ 
+---
