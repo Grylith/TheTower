@@ -4124,3 +4124,27 @@ BP_Room_SavePoint (Self)
 2. **Print String** — `"Press [E] to use Save Point — Costs 10 Essences"` *(Dev Only, Duration: 5.0s, Print to Screen: true, Print to Log: true)*
 
 ---
+
+#### TryActivateSavePoint (Function)
+**Graph:** BP_Room_SavePoint > TryActivateSavePoint
+
+**Logic:**
+1. **Branch** — Condition: `bEssenceSaved == true`
+   - **True** → **Print String** `"Already saved at this point"` *(Dev Only)* → **Return Node**
+   - **False** →
+2. **Get Player Character** (Player Index: 0)
+3. **Cast To BP_ThirdPersonCharacter** (Object: Player Character)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+4. **Get Component by Class** (Target: As BP_ThirdPersonCharacter, Component Class: BP_StatsComponent)
+5. **Is Valid** (Object: Stats Component)
+6. **Branch** — Condition: Is Valid
+   - **False** → **Print String** `"ERROR: Cannot find player stats"` *(Dev Only)* → **Return Node**
+   - **True** →
+7. **Print String** — `"Essence save attempted (System still needs to be built)"` *(Dev Only)*
+8. **SET** `Essence Saved` = true
+9. **Print String** — `"SAVE POINT ACTIVATED"` *(Dev Only)*
+
+> Save system is currently a stub — essence deduction and actual save logic not yet implemented. Guards against double-activation via `bEssenceSaved`.
+
+---
