@@ -4037,3 +4037,13 @@ BP_Room_Loot (Self)
 4. **Print String** — `"Loot Room Loaded — Chest Guaranteed"` *(Dev Only)*
 
 ---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Loot > OnRoomCleared
+
+**Logic:**
+1. **Parent: OnRoomCleared**
+2. **Call On Room Finished** (Target: self)
+3. **Print String** — `"Loot Room Cleared"` *(Dev Only)*
+
+---
