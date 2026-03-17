@@ -3926,3 +3926,12 @@ BP_Room_Combat (Self)
 2. **Print String** — `"Combat Room Cleared — Notifying Generator"` *(Dev Only)*
 
 ---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Combat > OnRoomCleared
+
+**Logic:**
+1. **Parent: OnRoomCleared** — calls parent implementation
+2. **Notify Room Cleared** (Target: self)
+
+---
