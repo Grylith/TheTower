@@ -4625,3 +4625,22 @@ None
 | Boss | Boss room; ends the floor on clear |
 
 ---
+
+## S_FloorBandData
+
+**Type:** Struct
+**Purpose:** Row struct for `DT_FloorBands`. Defines difficulty parameters for a range of floors.
+
+| Field | Type | Default |
+|---|---|---|
+| BandName | Name | None |
+| FloorMin | Integer | 0 |
+| FloorMax | Integer | 0 |
+| MinEnemiesPerRoom | Integer | 0 |
+| MaxEnemiesPerRoom | Integer | 0 |
+| LootChestChance | Float | 0.0 |
+| TrapChance | Float | 0.0 |
+| PropDensityMin | Float | 0.0 |
+| PropDensityMax | Float | 0.0 |
+
+---
