@@ -4312,3 +4312,36 @@ BP_RoomBase (Self)
 > Base implementation called by all subclass overrides via `Parent: SetupRoom`. Unpacks the spawn data struct, sets room state to Active, then delegates to the individual spawn functions.
 
 ---
+
+#### SpawnEnemies (Function)
+**Graph:** BP_RoomBase > SpawnEnemies
+
+**Logic:**
+1. **SET** `EnemiesAlive` = `SpawnData.EnemyCount`
+2. **SET** `TotalEnemiesSpawned` = `SpawnData.EnemyCount`
+3. **SET** `Available Spawn Points` = **Make Array** [EnemySpawn_1, EnemySpawn_2, EnemySpawn_3, EnemySpawn_4, EnemySpawn_5, EnemySpawn_6]
+4. **For Loop** (First Index: 0, Last Index: `EnemiesAlive - 1`)
+   - **Loop Body** →
+     - **SET** `Random Index` = random integer within `Available Spawn Points` length
+     - **GET** `Available Spawn Points[Random Index]` → **SET** `Selected Point`
+     - **Remove Index** `Random Index` from `Available Spawn Points` (prevents duplicate spawn points)
+     - **Branch** — Condition: `LENGTH(SpawnData.EnemyTypes) > 0`
+       - **False** → **Print String** `"No Enemys to Spawn"` *(Dev Only)* → end iteration
+       - **True** →
+     - **RANDOM** element from `SpawnData.EnemyTypes` → random enemy class
+     - **Get World Location** (Target: Selected Point)
+     - **Get World Rotation** (Target: Selected Point)
+     - **Spawn Actor**
+       - Class: random enemy class
+       - Location: Selected Point world location + (Z: +100)
+       - Rotation: Selected Point world rotation
+       - Scale: (1.0, 1.0, 1.0)
+       - Collision: Always Spawn, Ignore Collisions
+       - Transform Scale Method: Multiply Scale With Root Component Scale
+     - **SET** `Spawned Enemy` = Return Value
+     - **ADD** `Spawned Enemy` to `SpawnedEnemies` array
+   - **Completed** → **Print String** `"SpawnEnemies Complete"` *(Dev Only)*
+
+> Iterates once per enemy count, picking a random unique spawn point each iteration (removing used points from the pool). Enemy class is selected randomly from the `EnemyTypes` array in SpawnData.
+
+---
