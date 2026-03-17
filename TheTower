@@ -2708,3 +2708,16 @@ No inputs.
 | Dead | Character is dead |
  
 ---
+ 
+### E_DamageType (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Physical | Standard physical damage |
+| Magic | Magic damage |
+| Fire | Fire elemental damage |
+| Lightning | Lightning elemental damage |
+| Holy | Holy elemental damage |
+ 
+---
