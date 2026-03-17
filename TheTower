@@ -4773,3 +4773,45 @@ None
      - **False** → **Add to Input Buffer** (Target: CombatComponent, Attack Type: Light)
 
 ---
+
+**IA_LockOn (EnhancedInputAction):**
+- **Started** → **Toggle Lock On** (Target: **Get Component by Class**(self, BP_LockOnComponent))
+
+---
+
+**Event BeginPlay:**
+1. **Branch** — Condition: **Is Valid** (**Get Anim Instance**(Mesh))
+   - **False** → **Set Timer by Event** (Event: TryInitializeCombat, Time: 0.05, Looping: true)
+   - **True** →
+2. **Initialize Combat** (Target: CombatComponent)
+3. **Set Timer by Event** (Event: TryInitializeCombat, Time: 0.05, Looping: true)
+4. **Create WBP Player HUD Widget** (Class: WBP_PlayerHUD, Owning Player: **Get Player Controller**(0), Stats Component: StatsComponent)
+5. **SET** Stats Component on widget = StatsComponent
+6. **SET** `Player HUD` = widget Return Value
+7. **Add to Viewport** (Target: PlayerHUD)
+8. **Get Data Table Row** `DT_TestWeapons` (Row Name: `TestSword`)
+   - **Row Not Found** → end
+   - **Row Found** →
+9. **Break S_WeaponData** — unpacks: WeaponID, WeaponName, WeaponClass, WeaponMesh, SocketName, LightAttack[], HeavyAttack[], BlockPercentage, StaminaCostPerBlock, WeaponWeight
+10. **Branch** — Condition: `LENGTH(LightAttack) > 0`
+    - **False** → **Print String** `"ERROR: No attacks in data table!"` *(Dev Only)* → end
+    - **True** →
+11. **Spawn Actor** `BP_Weapon_BlackKnightSword` (Transform: **Get Actor Transform**(self), Collision: Default)
+12. **SET** `Equipped Weapon` = Return Value
+13. **Attach Actor To Component** (Target: EquippedWeapon, Parent: Mesh, Socket: `"Weapon_R"`, Location Rule: Snap to Target, Rotation Rule: Snap to Target, Scale Rule: Keep World, Weld Simulated Bodies: true)
+14. **Set Weapon Reference** (Target: **Get Component by Class**(self, BP_WeaponComponent), Weapon: EquippedWeapon)
+15. **Initialize Weapon** (Target: WeaponComponent, Weapon Data: from Break S_WeaponData)
+
+---
+
+**TryInitializeCombat** *(Custom Event):*
+1. **Branch** — Condition: **Is Valid** (**Get Anim Instance**(Mesh))
+   - **False** → end (loop continues until anim instance is ready)
+   - **True** →
+2. **Initialize Combat** (Target: CombatComponent)
+3. **Set Timer by Function Name** (Object: self, Function Name: `"CleanInputBuffer"`, Time: 0.1, Looping: true)
+4. **Clear and Invalidate Timer by Handle** (Handle: `InitCombatTimerHandle`)
+
+> BeginPlay polls until the anim instance is valid before initialising combat, ensuring the animation blueprint is ready before combat systems start. Weapon is hardcoded to TestSword row from DT_TestWeapons at startup.
+
+---
