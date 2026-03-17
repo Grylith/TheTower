@@ -4357,3 +4357,13 @@ BP_RoomBase (Self)
 > Currently a stub — no props are actually spawned. Logs the ChestSpawnPoint world location for debugging.
 
 ---
+
+#### SpawnChest (Function)
+**Graph:** BP_RoomBase > SpawnChest
+
+**Logic:**
+1. **Print String** — `"Chest Spawned"` *(Dev Only)*
+
+> Currently a stub — no chest actor is actually spawned yet.
+
+---
