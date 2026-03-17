@@ -2628,9 +2628,28 @@ No inputs.
 | CancelWindowEnd | Float | Normalised time cancel window closes |
 | MovementSpeedMultiplier | Float | Applied to movement during this attack |
 | RotationSpeedMultiplier | Float | Applied to rotation during this attack |
- 
+
+#### Default Values
+| Field | Default |
+|---|---|
+| AttackName | Light |
+| AttackType | Light |
+| AttackMontage | None |
+| Damage | 20.0 |
+| PoiseDamage | 15.0 |
+| StaminaCost | 20.0 |
+| ComboIndex | 0 |
+| NextComboAttackIndex | -1 |
+| ComboWindowStart | 0.5 |
+| ComboWindowEnd | 0.8 |
+| CanBeCanceled | false |
+| CancelWindowStart | 0.0 |
+| CancelWindowEnd | 0.0 |
+| MovementSpeedMultiplier | 1.0 |
+| RotationSpeedMultiplier | 0.3 |
+
 ---
- 
+
 ### DT_TestWeapon (Data Table)
 **Row Type:** S_WeaponData
 **Location:** CombatSystem/Data/DataTables
