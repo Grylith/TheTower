@@ -4644,3 +4644,21 @@ None
 | PropDensityMax | Float | 0.0 |
 
 ---
+
+## S_RoomSpawnData
+
+**Type:** Struct
+**Purpose:** Passed from `BP_DungeonGenerator` to each room via `SetupRoom`. Contains all parameters needed to configure and populate a room.
+
+| Field | Type | Default |
+|---|---|---|
+| RoomType | E_RoomType | Combat |
+| FloorNumber | Integer | 0 |
+| EnemyCount | Integer | 0 |
+| EnemyTypes | Array of Actor (class ref) | 0 elements |
+| bHasLootChest | Boolean | false |
+| bHasTrap | Boolean | false |
+| PropDensity | Float | 0.0 |
+| bIsFinalRoom | Boolean | false |
+
+---
