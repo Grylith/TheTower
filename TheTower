@@ -4148,3 +4148,125 @@ BP_Room_SavePoint (Self)
 > Save system is currently a stub — essence deduction and actual save logic not yet implemented. Guards against double-activation via `bEssenceSaved`.
 
 ---
+
+---
+
+## BP_RoomBase
+
+**Parent Class:** Actor
+**Type:** Actor Blueprint
+**Purpose:** Base class for all room types. Defines the shared component hierarchy, variables, functions, and Event Graph logic that all room subclasses inherit and override.
+
+---
+
+### Components
+
+```
+BP_RoomBase (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Variables
+| Category | Name | Type |
+|---|---|---|
+| Components | (component refs) | |
+| Room Setup | Room Type | E_RoomType |
+| Room Setup | Room State | E_RoomState |
+| Room Setup | Has Chest | Boolean |
+| Room Setup | Has Trap | Boolean |
+| Room Setup | Chest Class | Class Reference |
+| Room Setup | Room Initialized | Boolean |
+| Tracking | Enemies Alive | Integer |
+| Tracking | Total Enemies Spawned | Integer |
+| References | Doors in Room | Array of BP_DoorActor |
+| References | Owning Room | BP_RoomBase |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises the room with spawn data from the generator |
+| SpawnEnemies | Spawns enemies at EnemySpawn points |
+| SpawnProps | Spawns props at PropSpawn points |
+| SpawnChest | Spawns a chest at ChestSpawnPoint |
+| SpawnTrap | Spawns a trap in the room |
+| OnEnemyDied | Called when an individual enemy dies |
+| OnRoomCleared | Called when all enemies are defeated |
+| GetAllEnemySpawnPoints | Returns array of all EnemySpawn scene components |
+
+---
+
+### Event Dispatchers
+| Name | Note |
+|---|---|
+| OnRoomFinished | Broadcast when the room is fully complete |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| On Room Finished | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Room Type | Combat |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Is Valid** (Input Object: DoorActor → Child Actor)
+   - **Is Valid** →
+     - **Cast To BP_DoorActor** (Object: Child Actor)
+       - **Cast Succeeded** → **ADD** to `Doors in Room` array (As BP_DoorActor) → **SET** `Owning Room` = self (on BP_DoorActor)
+       - **Cast Failed** → (falls through)
+   - **Is Not Valid** → (falls through)
+2. **SET** `Enemies Alive` = 0
+3. **SET** `Room State` = `Locked`
+4. **Print String** — `"BP_RoomBase Ready"` *(Dev Only)*
+
+---
