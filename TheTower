@@ -4428,3 +4428,64 @@ BP_RoomBase (Self)
 > Utility function that returns all 6 enemy spawn point scene components as an array. Used by SpawnEnemies to build the available spawn point pool.
 
 ---
+
+---
+
+## BP_TestBoss
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** Placeholder boss character. Simulates a boss fight with a timer — auto-dies after 5 seconds and notifies the owning room.
+
+---
+
+### Components
+Default Character components: CapsuleComponent, Mesh (no mesh assigned), CharacterMovement
+
+---
+
+### Variables
+| Name | Type | Notes |
+|---|---|---|
+| OwningRoom | BP_RoomBase | Reference to the room that spawned this boss |
+| BossClass | BP_TestBoss | Self-referencing class variable |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Animation Mode | Use Animation Blueprint |
+| Anim Class | None |
+| Skeletal Mesh Asset | None |
+| Boss Class | None |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Mobility | Movable |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Print String** — `"Boss Spawned"` *(Dev Only)*
+2. **Set Timer by Event** (Event: BossDieTimer, Time: 5.0s, Looping: false)
+
+---
+
+**BossDieTimer** *(Custom Event):*
+1. **Print String** — `"Boss Defeated"` *(Dev Only)*
+2. **Is Valid** (Input Object: `Owning Room`)
+   - **Is Valid** → **On Enemy Died** (Target: Owning Room) → **Destroy Actor** (Target: self)
+   - **Is Not Valid** → **Print String** `"OwningRoom is Null"` *(Dev Only)* → **Destroy Actor** (Target: self)
+
+> Placeholder implementation — boss dies automatically after 5 seconds via a timer. Always destroys self regardless of whether OwningRoom is valid.
+
+---
