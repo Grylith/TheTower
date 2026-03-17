@@ -3285,3 +3285,16 @@ DoorRoot (Scene Component)
    - New Type: Query Only (No Physics Collision)
  
 ---
+ 
+#### LockDoor (Function)
+**Graph:** BP_DoorActor > LockDoor
+ 
+**Logic:**
+1. **SET** `Door State` = `Locked`
+2. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Red
+   - SRGB: true
+3. **Set Collision Enabled** (Target: DoorMesh)
+   - New Type: No Collision
+ 
+---
