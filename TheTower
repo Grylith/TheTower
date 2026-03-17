@@ -3575,3 +3575,38 @@ GeneratorRoot (Scene Component)
 > Resets the room index and active room reference, generates a fresh room sequence for the floor, then spawns the first room.
  
 ---
+ 
+#### OnRoomCompleted (Function)
+**Graph:** BP_DungeonGenerator > OnRoomCompleted
+ 
+**Logic:**
+1. **Branch** — Condition: `bCanTransition == true`
+   - **False** → **Print String** `"Can't Transition"` *(Dev Only)* → **Return Node**
+   - **True** →
+2. **Cast To BP_Room_Boss** (Object: Active Room)
+   - **Cast Succeeded** → **Print String** `"Boss room - skipping OnRoomCompleted"` *(Dev Only)*
+   - **Cast Failed** → (continues)
+3. **Branch** — Condition: `Room State == Cleared`
+   - **False** → **Print String** `"Room not cleared yet - ignoring"` *(Dev Only)* → **Return Node**
+   - **True** → **Print String** `"OnRoomCompleted Fired"` + `CurrentRoomIndex/LENGTH of Room Sequence` *(Dev Only)*
+4. **SET** `Character` = **Get Player Character** (Player Index: 0)
+5. **Is Valid** (Input Object: Active Room)
+   - **Is Not Valid** → **Return Node**
+   - **Is Valid** →
+6. **Destroy Actor** (Target: Active Room)
+7. **Get All Actors Of Class** (BP_TestEnemy) → **For Each Loop** → **Destroy Actor** each
+8. **Get All Actors Of Class** (BP_TestBoss) → **For Each Loop** → **Destroy Actor** each
+9. **SET** `Active Room` = null (cleared)
+10. **Branch** — Condition: `Current Room Index >= LENGTH of Room Sequence`
+    - **True** → **On Floor Complete** (Target: self) → **Return Node**
+    - **False** → **Spawn Next Room** (Target: self)
+11. **Is Valid** (Input Object: Active Room [newly spawned])
+    - **Is Not Valid** → **Print String** `"ERROR: New room invalid"` *(Dev Only)*
+    - **Is Valid** →
+      - **Print String** `"Player moved to new room"` *(Dev Only)*
+      - **Get Actor Location** (Target: Active Room) + offset (X: 0, Y: 0, Z: 100)
+      - **Set Actor Location** (Target: Character, New Location: Active Room location + Z100)
+ 
+> Guards against transitioning when not allowed or room not cleared. Destroys the old room and all enemies, then either completes the floor or spawns the next room and teleports the player to it (+100 Z offset).
+ 
+---
