@@ -2862,3 +2862,60 @@ No inputs.
 | bProcessed | false |
  
 ---
+ 
+---
+ 
+## UI
+ 
+---
+ 
+### WBP_PlayerHUD (Widget Blueprint)
+**Parent Class:** User Widget
+**Location:** CombatSystem/UI
+ 
+#### Widget Hierarchy
+```
+[WBP_PlayerHUD]
+└── Canvas Panel
+    └── Vertical Box
+        ├── [Health] "Health"
+        │   ├── Health_ProgressBar
+        │   └── Text "Text Block"
+        ├── Spacer
+        └── [Stamina] "Stamina"
+            ├── Stamina_ProgressBar
+            └── Text "Text Block"
+```
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| Health_ProgressBar | Progress Bar (widget reference) |
+| Stamina_ProgressBar | Progress Bar (widget reference) |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Get_Health_ProgressBar_Percent | Returns health as 0.0–1.0 for progress bar |
+| Get_Stamina_ProgressBar_Percent | Returns stamina as 0.0–1.0 for progress bar |
+| Get_Stamina_ProgressBar_FillColorAndOpacity | Returns fill colour for stamina bar |
+| GetText_Health | Returns health value as text |
+| GetText_Stamina | Returns stamina value as text |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Stats Component | None |
+| Color and Opacity | White |
+| Foreground Color | Magenta/Pink |
+| Padding | 0.0 |
+| Visibility | Not Hit-Testable (Self Only) |
+| Pivot | (0.5, 0.5) |
+| Render Opacity | 1.0 |
+ 
+#### Event Graph
+- Event Pre Construct — disabled (no logic yet)
+- Event Construct — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
