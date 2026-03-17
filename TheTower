@@ -3610,3 +3610,21 @@ GeneratorRoot (Scene Component)
 > Guards against transitioning when not allowed or room not cleared. Destroys the old room and all enemies, then either completes the floor or spawns the next room and teleports the player to it (+100 Z offset).
  
 ---
+ 
+#### OnFloorComplete (Function)
+**Graph:** BP_DungeonGenerator > OnFloorComplete
+ 
+**Logic:**
+1. **Branch** — Condition: **Is Valid** (Active Room)
+   - **False** → (skips destroy, continues)
+   - **True** → **Destroy Actor** (Target: Active Room)
+2. **Get All Actors Of Class** (BP_TestEnemy) → **For Each Loop** → **Destroy Actor** each
+3. **Get All Actors Of Class** (BP_TestBoss) → **For Each Loop** → **Destroy Actor** each
+4. **SET** `Active Room` = null (cleared)
+5. **SET** `Current Floor Number` = Current Floor Number + 1
+6. **Print String** — `"FLOOR COMPLETE! Starting Floor: "` + new Current Floor Number *(Dev Only)*
+7. **Start Floor** (Target: self)
+ 
+> Cleans up the active room and all remaining enemies/bosses, increments the floor counter, then starts the next floor.
+ 
+---
