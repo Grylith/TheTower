@@ -4047,3 +4047,80 @@ BP_Room_Loot (Self)
 3. **Print String** — `"Loot Room Cleared"` *(Dev Only)*
 
 ---
+
+---
+
+## BP_Room_SavePoint
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Save point room — no enemies; auto-clears on BeginPlay and prompts the player to spend Essences to save/heal when they enter RoomBounds.
+
+---
+
+### Components
+
+```
+BP_Room_SavePoint (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Variables
+| Name | Type | Notes |
+|---|---|---|
+| bEssenceSaved | Boolean | Whether the player has already used this save point |
+| EssenceCost | Integer | Essence cost to activate the save point |
+| HealthPenaltyPct | Float | Health penalty percentage applied on use |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| TryActivateSavePoint | Attempts to activate the save point for the player |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **SET** `Enemies Alive` = 0
+3. **Delay** (Duration: 1.0s)
+4. **On Room Cleared** (Target: self)
+5. **Print String** — `"Save Point Room Ready"` *(Dev Only)*
+
+---
+
+**On Component Begin Overlap (RoomBounds):**
+1. **Cast To BP_ThirdPersonCharacter** (Object: Other Actor)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+2. **Print String** — `"Press [E] to use Save Point — Costs 10 Essences"` *(Dev Only, Duration: 5.0s, Print to Screen: true, Print to Log: true)*
+
+---
