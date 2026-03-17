@@ -2754,3 +2754,29 @@ No inputs.
 | Axe | Axe weapon type |
  
 ---
+ 
+### S_CombatStats (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| MaxHealth | Float | |
+| MaxStamina | Float | |
+| StaminaRegenRate | Float | |
+| StaminaRegenDelay | Float | |
+| PoiseRegenRate | Float | |
+| PoiseRegenDelay | Float | |
+| MaxPoise | Float | |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| MaxHealth | 100.0 |
+| MaxStamina | 100.0 |
+| StaminaRegenRate | 20.0 |
+| StaminaRegenDelay | 1.0 |
+| PoiseRegenRate | 10.0 |
+| PoiseRegenDelay | 5.0 |
+| MaxPoise | 100.0 |
+ 
+---
