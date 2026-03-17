@@ -2591,11 +2591,11 @@ No inputs.
 ### S_WeaponData (Struct)
 **Location:** CombatSystem/Data/Structures
 > Row type used by DT_TestWeapon. Fields revealed by data table inspection.
- 
+
 | Field | Type | Note |
 |---|---|---|
 | WeaponID | Name | |
-| WeaponName | Name | |
+| WeaponName | Text | |
 | WeaponClass | E_WeaponClass (enum) | e.g. StraightSword |
 | WeaponMesh | Skeletal Mesh | |
 | SocketName | Name | Socket to attach weapon to on character |
@@ -2604,7 +2604,21 @@ No inputs.
 | BlockPercentage | Float | Damage reduction while blocking (0.0–1.0) |
 | StaminaCostPerBlock | Float | Stamina drained per blocked hit |
 | WeaponWeight | Float | |
- 
+
+#### Default Values
+| Field | Default |
+|---|---|
+| WeaponID | None |
+| WeaponName | (empty) |
+| WeaponClass | StraightSword |
+| WeaponMesh | None |
+| SocketName | WeaponSocket |
+| LightAttack | 0 array elements |
+| HeavyAttack | 0 array elements |
+| BlockPercentage | 5.0 |
+| StaminaCostPerBlock | 5.0 |
+| WeaponWeight | 5.0 |
+
 ---
  
 ### S_AttackData (Struct)
