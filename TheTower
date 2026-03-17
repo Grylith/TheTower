@@ -2947,3 +2947,24 @@ No inputs.
 > Simpler than the health version — no validity check, calls Get Stamina Percent directly.
  
 ---
+ 
+#### GetText_Health (Pure Function)
+**Graph:** WBP_PlayerHUD > GetText_Health
+**Output:** Text (e.g. "75/100")
+ 
+**Logic:**
+1. **Get Base Stats** (Target: Stats Component)
+   - Used output: Base Stat Max Health
+2. **Get Current Health** (Target: Stats Component)
+   - Used output: Current Health
+3. **Append**
+   - A: Current Health
+   - B: `"/"`
+   - C: Base Stat Max Health
+4. **To Text (String)** — converts appended string to Text
+   - In String: Append Return Value
+   - Return Value → **Return Node**
+ 
+> Builds a "CurrentHealth/MaxHealth" display string for the HUD health label.
+ 
+---
