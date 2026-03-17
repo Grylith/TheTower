@@ -3818,3 +3818,13 @@ RoomRoot
 > Guards against calls before the boss spawns. Decrements enemy count and, when all enemies are gone, marks the boss as defeated, sets room to Cleared, and triggers OnFloorComplete on the generator.
 
 ---
+
+#### SpawnEnemies (Function)
+**Graph:** BP_Room_Boss > SpawnEnemies
+
+**Logic:**
+1. **Spawn Boss** (Target: self)
+
+> Boss room override — delegates directly to SpawnBoss rather than spawning regular enemies.
+
+---
