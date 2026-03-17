@@ -3782,3 +3782,17 @@ RoomRoot
 > Called by the boss when it dies. Clears the room state and directly calls OnFloorComplete on the generator (bypasses OnRoomCompleted since boss rooms end the floor).
  
 ---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Boss > OnRoomCleared
+
+**Logic:**
+1. **Print String** — `"Boss OnRoomCleared fired"` *(Dev Only)*
+2. **Parent: OnRoomCleared** — calls parent implementation
+3. **Get All Actors Of Class** (Actor Class: BP_DungeonGenerator) → **GET** [0]
+4. **On Floor Complete** (Target: BP_DungeonGenerator)
+5. **Print String** — `"Floor Complete!"` *(Dev Only)*
+
+> Boss room override of OnRoomCleared — calls parent then directly triggers OnFloorComplete on the generator, since clearing the boss room ends the floor.
+
+---
