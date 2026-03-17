@@ -3028,3 +3028,32 @@ No inputs.
 - Event Tick — disabled (no logic yet)
  
 ---
+ 
+#### AddItem (Function)
+**Graph:** BP_InventoryComponent > AddItem
+**Access:** Public
+**Inputs:** Item (S_ItemData)
+**Outputs:** Success (Boolean)
+ 
+**Logic:**
+1. **For Each Loop** — iterates over Inventory array
+   - **Break S_ItemData** (existing slot) → Item ID, Item Name, Max Stack Size
+   - **Break S_ItemData** (incoming Item) → Item ID, Item Name, Item Icon, Quantity, Max Stack Size, Item Type
+ 
+2. **Branch 1** — `existing Item ID == incoming Item ID`
+   - **True** → **Branch 2** — `existing Quantity < Max Stack Size` (stack not full)
+     - **True** → **Set Array Elem** — updates existing slot with merged quantity (`existing Quantity + incoming Quantity`)
+       - Target Array: Inventory
+       - Index: Array Index (from loop)
+       - Sets all fields: Item ID, Item Name, Item Icon, Quantity, Max Stack Size, Item Type, Size to Fit
+       → **Return Node** (Success: true)
+     - **False** → continues loop (stack full, look for another slot)
+ 
+3. **For Each Loop Completed** (no matching stack found) →
+   - **LENGTH** — gets current Inventory array length
+   - **Branch 3** — `Length < MaxSlots` (inventory has space)
+     - **True** → **ADD** — appends Item to Inventory array
+       → **Return Node** (Success: true)
+     - **False** → **Return Node** (Success: false — inventory full)
+ 
+---
