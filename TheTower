@@ -3912,3 +3912,17 @@ BP_Room_Combat (Self)
 | Include Actor in HLOD | true |
 
 ---
+
+#### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **Print String** — `"Combat Room Loaded"` *(Dev Only)*
+
+---
+
+**NotifyRoomCleared** *(Custom Event):*
+1. **Call On Room Finished** (Target: self)
+2. **Print String** — `"Combat Room Cleared — Notifying Generator"` *(Dev Only)*
+
+---
