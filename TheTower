@@ -3510,3 +3510,19 @@ GeneratorRoot (Scene Component)
 > Samples the current floor band to roll all room parameters, then packages them into an S_RoomSpawnData struct. Boss rooms are flagged as the final room automatically.
  
 ---
+ 
+#### GetRoomClassForType (Function)
+**Graph:** BP_DungeonGenerator > GetRoomClassForType
+**Input:** In Room Type (E_RoomType)
+**Output:** Actor Class
+ 
+**Logic:**
+1. **Switch on E_RoomType** (Selection: In Room Type)
+   - `Combat` → **Return Node** (Return Value: CombatRoomClass)
+   - `Loot` → **Return Node** (Return Value: LootRoomClass)
+   - `Save Point` → **Return Node** (Return Value: SavePointRoomClass)
+   - `Boss` → **Return Node** (Return Value: BossRoomClass)
+ 
+> Simple switch that maps each E_RoomType enum value to the corresponding room class variable.
+ 
+---
