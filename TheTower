@@ -3320,3 +3320,23 @@ DoorRoot (Scene Component)
 > Unlocks the door, turns the light green, then enables the trigger zone after a 3 second delay.
  
 ---
+ 
+#### OpenDoor (Function)
+**Graph:** BP_DoorActor > OpenDoor
+ 
+**Logic:**
+1. **Branch** — Condition: `Door State == Unlocked`
+   - **False** → **Return Node** (early exit)
+   - **True** →
+2. **SET** `Door State` = `Opened`
+3. **Set Visibility** (Target: DoorMesh)
+   - New Visibility: false (hidden)
+   - Propagate to Children: false
+4. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Blue
+   - SRGB: true
+5. **Transition to Next Room** (Target: self)
+ 
+> Only opens if Unlocked. Hides the door mesh, turns the light blue, then triggers the room transition.
+ 
+---
