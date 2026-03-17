@@ -2830,3 +2830,21 @@ No inputs.
 | RecoveryTime | 1.0 |
  
 ---
+ 
+### S_InputBufferEntry (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| AttackType | E_AttackType (enum) | The type of attack input buffered |
+| TimeStamp | Float | Time the input was recorded |
+| bProcessed | Boolean | Whether this input has been consumed |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| AttackType | Light |
+| TimeStamp | 0.0 |
+| bProcessed | false |
+ 
+---
