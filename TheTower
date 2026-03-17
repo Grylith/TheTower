@@ -4377,3 +4377,25 @@ BP_RoomBase (Self)
 > Currently a stub — no trap actor is actually spawned yet.
 
 ---
+
+#### OnEnemyDied (Function)
+**Graph:** BP_RoomBase > OnEnemyDied
+
+**Logic:**
+1. **Print String** — `"OnEnemyDied called"` *(Dev Only)*
+2. **Branch** — Condition: `Enemies Alive > 0`
+   - **False** → **Return Node** (guard: already at 0, exit early)
+   - **True** →
+3. **SET** `Enemies Alive` = `Enemies Alive - 1`
+4. **Print String** *(Dev Only)* — **Append**: `"Now: "` + [Enemies Alive value]
+5. **Branch** — Condition: `Enemies Alive <= 0`
+   - **False** → end (enemies still remaining)
+   - **True** →
+6. **Print String** — `"Calling OnRoomCleared"` *(Dev Only)*
+7. **Branch** — Condition: `Enemies Alive <= 0` (secondary guard)
+   - **True** → **On Room Cleared** (Target: self)
+   - **False** → **Print String** `"Guard blocked"` *(Dev Only)* → **Return Node**
+
+> Decrements the enemy count on each death. Double-checks the count before calling OnRoomCleared to guard against race conditions or duplicate calls.
+
+---
