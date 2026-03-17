@@ -3638,3 +3638,75 @@ GeneratorRoot (Scene Component)
 > Called by the timer in SpawnNextRoom (2s delay) to allow the player to trigger the next room transition.
  
 ---
+ 
+---
+ 
+### BP_Room_Boss (Actor Blueprint)
+**Parent Class:** BP_RoomBase
+**Location:** DungeonSystem/Core/Rooms
+ 
+#### Components
+```
+RoomRoot
+├── BossSpawn
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+└── EnemySpawnRoot
+    └── EnemySpawn_1
+```
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| BossClass | Actor | Class of the boss to spawn |
+| SpawnedBoss | Actor | Reference to the spawned boss |
+| bBossDefeated | Boolean | Whether the boss has been defeated |
+| bBossSpawned | Boolean | Whether the boss has been spawned |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises the room with spawn data |
+| SpawnBoss | Spawns the boss at BossSpawn location |
+| OnBossDefeated | Called when the boss dies |
+| SpawnEnemies | Spawns regular enemies |
+| OnRoomCleared | Called when all enemies/boss are defeated |
+| OnEnemyDied | Called when an individual enemy dies |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Boss Class | BP_Ty... (assigned) |
+| Boss Defeated | false |
+| Boss Spawned | false |
+| On Room Finished | 0 |
+| Room Type | Boss |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+- **Event BeginPlay** → **Parent_BeginPlay** (calls parent implementation)
+- **Event ActorBeginOverlap** → **Parent_ActorBeginOverlap** — disabled (no logic yet)
+- **Event Tick** → **Parent_Tick** — disabled (no logic yet)
+ 
+---
