@@ -4825,3 +4825,23 @@ None
 2. **Add Controller Pitch Input** (Target: self, Val: Y Axis) *(Up/Down)*
 
 ---
+
+#### Move (Function)
+**Graph:** BP_ThirdPersonCharacter > Move
+**Inputs:** X Axis (Float), Y Axis (Float)
+
+**Logic:**
+
+*Left/Right:*
+1. **Get Control Rotation** (Target: self) → Yaw
+2. **Get Right Vector** (In Rot X: 0.0, In Rot Y: 0.0, In Rot Z: Yaw)
+3. **Add Movement Input** (Target: self, World Direction: Right Vector, Scale Value: X Axis)
+
+*Forward/Backward:*
+1. **Get Control Rotation** (Target: self) → Yaw
+2. **Get Forward Vector** (In Rot X: 0.0, In Rot Y: 0.0, In Rot Z: Yaw)
+3. **Add Movement Input** (Target: self, World Direction: Forward Vector, Scale Value: Y Axis)
+
+> Both axes use only the Yaw component of the control rotation, keeping movement flat relative to the camera direction regardless of pitch.
+
+---
