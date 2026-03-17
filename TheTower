@@ -3081,3 +3081,39 @@ No inputs.
 | ItemType | 0 |
  
 ---
+ 
+### WBP_ItemSlot (Widget Blueprint)
+**Parent Class:** User Widget
+**Location:** CombatSystem/UI/Inventory
+ 
+#### Widget Hierarchy
+```
+[WBP_ItemSlot]
+└── Canvas Panel
+    ├── Image_ItemIcon
+    └── Text_Quantity "1"
+```
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| Image_ItemIcon | Image (widget reference) |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Color and Opacity | White |
+| Foreground Color | Magenta/Pink |
+| Padding | 0.0 |
+| Visibility | Not Hit-Testable |
+| Pivot | (0.5, 0.5) |
+| Render Opacity | 1.0 |
+| Slot | None |
+| Navigation | None |
+ 
+#### Event Graph
+- Event Pre Construct — disabled (no logic yet)
+- Event Construct — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
