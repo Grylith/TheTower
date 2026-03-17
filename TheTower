@@ -2780,3 +2780,29 @@ No inputs.
 | MaxPoise | 100.0 |
  
 ---
+ 
+### S_DamageInfo (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| DamageAmount | Float | |
+| DamageType | E_DamageType (enum) | |
+| PoiseDamage | Float | |
+| Instigator | Actor | The actor dealing the damage |
+| HitLocation | Vector | World position of the hit |
+| HitDirection | Vector | Direction the hit came from |
+| CanBeBlocked | Boolean | Whether this damage can be blocked |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| DamageAmount | 10.0 |
+| DamageType | Physical |
+| PoiseDamage | 10.0 |
+| Instigator | None |
+| HitLocation | (0.0, 0.0, 0.0) |
+| HitDirection | (0.0, 0.0, 0.0) |
+| CanBeBlocked | true |
+ 
+---
