@@ -4541,3 +4541,45 @@ None
 > Uses `Get All Actors Of Class` to find the room rather than a stored reference. Only calls `OnEnemyDied` if the room is still Active, preventing stale death notifications.
 
 ---
+
+---
+
+## DT_FloorBands
+
+**Type:** Data Table
+**Row Struct:** S_FloorBandData
+**Purpose:** Defines difficulty scaling bands by floor range. Used by `BP_DungeonGenerator > GetFloorBandData` to look up spawn parameters for the current floor.
+
+---
+
+### Columns
+| Field | Type | Description |
+|---|---|---|
+| BandName | Name | Human-readable label for the band |
+| FloorMin | Integer | First floor number in this band |
+| FloorMax | Integer | Last floor number in this band |
+| MinEnemiesPerRoom | Integer | Minimum enemies spawned per combat room |
+| MaxEnemiesPerRoom | Integer | Maximum enemies spawned per combat room |
+| LootChestChance | Float | Probability (0–1) a room has a chest |
+| TrapChance | Float | Probability (0–1) a room has a trap |
+| PropDensityMin | Float | Minimum prop density multiplier |
+| PropDensityMax | Float | Maximum prop density multiplier |
+
+---
+
+### Data
+
+| Row | BandName | FloorMin | FloorMax | MinEnemies | MaxEnemies | LootChest% | Trap% | PropMin | PropMax |
+|---|---|---|---|---|---|---|---|---|---|
+| Band_01 | Floors 1-10 | 1 | 10 | 2 | 3 | 0.30 | 0.10 | 0.20 | 0.40 |
+| Band_02 | Floors 11-20 | 11 | 20 | 2 | 4 | 0.30 | 0.20 | 0.30 | 0.50 |
+| Band_03 | Floors 21-30 | 21 | 30 | 3 | 4 | 0.40 | 0.20 | 0.30 | 0.50 |
+| Band_04 | Floors 31-40 | 31 | 40 | 3 | 5 | 0.40 | 0.30 | 0.40 | 0.60 |
+| Band_05 | Floors 41-50 | 41 | 50 | 4 | 5 | 0.50 | 0.30 | 0.40 | 0.60 |
+| Band_06 | Floors 51-60 | 51 | 60 | 4 | 6 | 0.50 | 0.40 | 0.50 | 0.70 |
+| Band_07 | Floors 61-70 | 61 | 70 | 5 | 6 | 0.50 | 0.40 | 0.50 | 0.70 |
+| Band_08 | Floors 71-80 | 71 | 80 | 5 | 7 | 0.60 | 0.50 | 0.60 | 0.80 |
+| Band_09 | Floors 81-90 | 81 | 90 | 6 | 7 | 0.60 | 0.50 | 0.60 | 0.80 |
+| Band_10 | Floors 91-100 | 91 | 100 | 6 | 8 | 0.70 | 0.60 | 0.70 | 1.00 |
+
+---
