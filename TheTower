@@ -3057,3 +3057,27 @@ No inputs.
      - **False** → **Return Node** (Success: false — inventory full)
  
 ---
+ 
+### S_ItemData (Struct)
+**Location:** CombatSystem/UI/Inventory
+ 
+| Field | Type | Note |
+|---|---|---|
+| ItemID | Name | Unique identifier for the item |
+| ItemName | Text | Display name |
+| ItemIcon | Texture 2D | Icon image |
+| Quantity | Integer | Current stack quantity |
+| MaxStackSize | Integer | Maximum stack size |
+| ItemType | Integer | Item type identifier |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| ItemID | None |
+| ItemName | (empty) |
+| ItemIcon | None |
+| Quantity | 0 |
+| MaxStackSize | 0 |
+| ItemType | 0 |
+ 
+---
