@@ -3298,3 +3298,25 @@ DoorRoot (Scene Component)
    - New Type: No Collision
  
 ---
+ 
+#### UnlockDoor (Function)
+**Graph:** BP_DoorActor > UnlockDoor
+ 
+**Logic:**
+1. **Branch** — Condition: `Door State == Locked`
+   - **False** → **Print String** — `"Door already unlocked or open"` *(Development Only)*
+   - **True** →
+2. **SET** `Door State` = `Unlocked`
+3. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Green
+   - SRGB: true
+4. **Create Event** — Signature: `EnableTriggerZone()` (Target: self)
+5. **Set Timer by Event**
+   - Event: EnableTriggerZone (via Create Event)
+   - Time: 3.0
+   - Looping: false
+   - Max Once Per Frame: false
+ 
+> Unlocks the door, turns the light green, then enables the trigger zone after a 3 second delay.
+ 
+---
