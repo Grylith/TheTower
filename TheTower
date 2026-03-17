@@ -3562,3 +3562,16 @@ GeneratorRoot (Scene Component)
 > Validates the sequence has rooms remaining, spawns the next room at RoomSpawnLocation, sets it up with generated spawn data, wires the door to the following room's class and data, increments the room index, then enables transition after a 2 second delay.
  
 ---
+ 
+#### StartFloor (Function)
+**Graph:** BP_DungeonGenerator > StartFloor
+ 
+**Logic:**
+1. **SET** `Current Room Index` = 0
+2. **SET** `Active Room` = null (cleared)
+3. **Roll Room Sequence** (Target: self)
+4. **Spawn Next Room** (Target: self)
+ 
+> Resets the room index and active room reference, generates a fresh room sequence for the floor, then spawns the first room.
+ 
+---
