@@ -2591,11 +2591,11 @@ No inputs.
 ### S_WeaponData (Struct)
 **Location:** CombatSystem/Data/Structures
 > Row type used by DT_TestWeapon. Fields revealed by data table inspection.
- 
+
 | Field | Type | Note |
 |---|---|---|
 | WeaponID | Name | |
-| WeaponName | Name | |
+| WeaponName | Text | |
 | WeaponClass | E_WeaponClass (enum) | e.g. StraightSword |
 | WeaponMesh | Skeletal Mesh | |
 | SocketName | Name | Socket to attach weapon to on character |
@@ -2604,7 +2604,21 @@ No inputs.
 | BlockPercentage | Float | Damage reduction while blocking (0.0–1.0) |
 | StaminaCostPerBlock | Float | Stamina drained per blocked hit |
 | WeaponWeight | Float | |
- 
+
+#### Default Values
+| Field | Default |
+|---|---|
+| WeaponID | None |
+| WeaponName | (empty) |
+| WeaponClass | StraightSword |
+| WeaponMesh | None |
+| SocketName | WeaponSocket |
+| LightAttack | 0 array elements |
+| HeavyAttack | 0 array elements |
+| BlockPercentage | 5.0 |
+| StaminaCostPerBlock | 5.0 |
+| WeaponWeight | 5.0 |
+
 ---
  
 ### S_AttackData (Struct)
@@ -2628,9 +2642,28 @@ No inputs.
 | CancelWindowEnd | Float | Normalised time cancel window closes |
 | MovementSpeedMultiplier | Float | Applied to movement during this attack |
 | RotationSpeedMultiplier | Float | Applied to rotation during this attack |
- 
+
+#### Default Values
+| Field | Default |
+|---|---|
+| AttackName | Light |
+| AttackType | Light |
+| AttackMontage | None |
+| Damage | 20.0 |
+| PoiseDamage | 15.0 |
+| StaminaCost | 20.0 |
+| ComboIndex | 0 |
+| NextComboAttackIndex | -1 |
+| ComboWindowStart | 0.5 |
+| ComboWindowEnd | 0.8 |
+| CanBeCanceled | false |
+| CancelWindowStart | 0.0 |
+| CancelWindowEnd | 0.0 |
+| MovementSpeedMultiplier | 1.0 |
+| RotationSpeedMultiplier | 0.3 |
+
 ---
- 
+
 ### DT_TestWeapon (Data Table)
 **Row Type:** S_WeaponData
 **Location:** CombatSystem/Data/DataTables
@@ -2679,3 +2712,2136 @@ No inputs.
 - ERROR on Set Value as Object — Get Target Actor node uses invalid target (purged)
 - Compiler warning: blueprint is not BTS_DetectPlayer_C, Target must have connection
  
+ 
+---
+ 
+### E_AttackType (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Light | Standard light attack |
+| Heavy | Standard heavy attack |
+| Charged | Charged attack |
+| Special | Special attack |
+| Dodge | Dodge action |
+ 
+---
+ 
+### E_CombatState (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Idle | Default state, no combat action |
+| Attacking | Currently performing an attack |
+| Blocking | Currently blocking |
+| Dodging | Currently performing a dodge |
+| Staggered | Hit and interrupted |
+| Dead | Character is dead |
+ 
+---
+ 
+### E_DamageType (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Physical | Standard physical damage |
+| Magic | Magic damage |
+| Fire | Fire elemental damage |
+| Lightning | Lightning elemental damage |
+| Holy | Holy elemental damage |
+ 
+---
+ 
+### E_WeaponClass (Enum)
+**Location:** CombatSystem/Data/Enums
+ 
+| Value | Note |
+|---|---|
+| Unarmed | No weapon equipped |
+| StraightSword | Standard one-handed sword |
+| GreatSword | Large two-handed sword |
+| Dagger | Fast short blade |
+| Spear | Long reach polearm |
+| Axe | Axe weapon type |
+ 
+---
+ 
+### S_CombatStats (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| MaxHealth | Float | |
+| MaxStamina | Float | |
+| StaminaRegenRate | Float | |
+| StaminaRegenDelay | Float | |
+| PoiseRegenRate | Float | |
+| PoiseRegenDelay | Float | |
+| MaxPoise | Float | |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| MaxHealth | 100.0 |
+| MaxStamina | 100.0 |
+| StaminaRegenRate | 20.0 |
+| StaminaRegenDelay | 1.0 |
+| PoiseRegenRate | 10.0 |
+| PoiseRegenDelay | 5.0 |
+| MaxPoise | 100.0 |
+ 
+---
+ 
+### S_DamageInfo (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| DamageAmount | Float | |
+| DamageType | E_DamageType (enum) | |
+| PoiseDamage | Float | |
+| Instigator | Actor | The actor dealing the damage |
+| HitLocation | Vector | World position of the hit |
+| HitDirection | Vector | Direction the hit came from |
+| CanBeBlocked | Boolean | Whether this damage can be blocked |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| DamageAmount | 10.0 |
+| DamageType | Physical |
+| PoiseDamage | 10.0 |
+| Instigator | None |
+| HitLocation | (0.0, 0.0, 0.0) |
+| HitDirection | (0.0, 0.0, 0.0) |
+| CanBeBlocked | true |
+ 
+---
+ 
+### S_DodgeData (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| DodgeMontage | Anim Montage | Montage to play for the dodge |
+| StaminaCost | Float | Stamina consumed on dodge |
+| IFrameStart | Float | Normalised time invincibility frames begin |
+| IFrameEnd | Float | Normalised time invincibility frames end |
+| DodgeDistance | Float | Distance covered by the dodge |
+| RecoveryTime | Float | Time before next action is allowed |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| DodgeMontage | AM_Dodge_F |
+| StaminaCost | 30.0 |
+| IFrameStart | 0.1 |
+| IFrameEnd | 0.4 |
+| DodgeDistance | 400.0 |
+| RecoveryTime | 1.0 |
+ 
+---
+ 
+### S_InputBufferEntry (Struct)
+**Location:** CombatSystem/Data/Structures
+ 
+| Field | Type | Note |
+|---|---|---|
+| AttackType | E_AttackType (enum) | The type of attack input buffered |
+| TimeStamp | Float | Time the input was recorded |
+| bProcessed | Boolean | Whether this input has been consumed |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| AttackType | Light |
+| TimeStamp | 0.0 |
+| bProcessed | false |
+ 
+---
+ 
+---
+ 
+## UI
+ 
+---
+ 
+### WBP_PlayerHUD (Widget Blueprint)
+**Parent Class:** User Widget
+**Location:** CombatSystem/UI
+ 
+#### Widget Hierarchy
+```
+[WBP_PlayerHUD]
+└── Canvas Panel
+    └── Vertical Box
+        ├── [Health] "Health"
+        │   ├── Health_ProgressBar
+        │   └── Text "Text Block"
+        ├── Spacer
+        └── [Stamina] "Stamina"
+            ├── Stamina_ProgressBar
+            └── Text "Text Block"
+```
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| Health_ProgressBar | Progress Bar (widget reference) |
+| Stamina_ProgressBar | Progress Bar (widget reference) |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Get_Health_ProgressBar_Percent | Returns health as 0.0–1.0 for progress bar |
+| Get_Stamina_ProgressBar_Percent | Returns stamina as 0.0–1.0 for progress bar |
+| Get_Stamina_ProgressBar_FillColorAndOpacity | Returns fill colour for stamina bar |
+| GetText_Health | Returns health value as text |
+| GetText_Stamina | Returns stamina value as text |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Stats Component | None |
+| Color and Opacity | White |
+| Foreground Color | Magenta/Pink |
+| Padding | 0.0 |
+| Visibility | Not Hit-Testable (Self Only) |
+| Pivot | (0.5, 0.5) |
+| Render Opacity | 1.0 |
+ 
+#### Event Graph
+- Event Pre Construct — disabled (no logic yet)
+- Event Construct — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
+ 
+#### Get_Health_ProgressBar_Percent (Pure Function)
+**Graph:** WBP_PlayerHUD > Get_Health_ProgressBar_Percent
+**Output:** Float (0.0–1.0)
+ 
+**Logic:**
+1. **Is Valid** — checks Stats Component
+   - Object: Stats Component
+2. **Branch** — Condition: Is Valid result
+   - **True** → **Get Health Percent** (Target: Stats Component)
+     - Percent → **Return Node** (returns health as float)
+   - **False** → **Return Node**
+     - Return Value: `1.0` (defaults to full if no component)
+ 
+---
+ 
+#### Get_Stamina_ProgressBar_Percent (Pure Function)
+**Graph:** WBP_PlayerHUD > Get_Stamina_ProgressBar_Percent
+**Output:** Float (0.0–1.0)
+ 
+**Logic:**
+1. **Get Stamina Percent** (Target: BP Stats Component)
+   - Target: Stats Component
+   - Percent → **Return Node** (returns stamina as float)
+ 
+> Simpler than the health version — no validity check, calls Get Stamina Percent directly.
+ 
+---
+ 
+#### GetText_Health (Pure Function)
+**Graph:** WBP_PlayerHUD > GetText_Health
+**Output:** Text (e.g. "75/100")
+ 
+**Logic:**
+1. **Get Base Stats** (Target: Stats Component)
+   - Used output: Base Stat Max Health
+2. **Get Current Health** (Target: Stats Component)
+   - Used output: Current Health
+3. **Append**
+   - A: Current Health
+   - B: `"/"`
+   - C: Base Stat Max Health
+4. **To Text (String)** — converts appended string to Text
+   - In String: Append Return Value
+   - Return Value → **Return Node**
+ 
+> Builds a "CurrentHealth/MaxHealth" display string for the HUD health label.
+ 
+---
+ 
+#### GetText_Stamina (Pure Function)
+**Graph:** WBP_PlayerHUD > GetText_Stamina
+**Output:** Text (e.g. "60/100")
+ 
+**Logic:**
+1. **Get Current Stamina** (Target: Stats Component)
+   - Used output: Current Stamina
+2. **Get Base Stats** (Target: Stats Component)
+   - Used output: Base Stat Max Stamina
+3. **Append**
+   - A: Current Stamina
+   - B: `"/"`
+   - C: Base Stat Max Stamina
+4. **To Text (String)** — converts appended string to Text
+   - In String: Append Return Value
+   - Return Value → **Return Node**
+ 
+> Same pattern as GetText_Health but for stamina — builds "CurrentStamina/MaxStamina" display string.
+ 
+---
+ 
+---
+ 
+## Inventory System
+ 
+---
+ 
+### BP_InventoryComponent (Actor Component)
+**Parent Class:** Actor Component
+**Location:** CombatSystem/UI/Inventory
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| Inventory | Array of S_ItemData | The inventory item array |
+| MaxSlots | Integer | Max number of inventory slots |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| AddItem | Adds an item to the inventory (2 overridable) |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Start with Tick Enabled | true |
+| Tick Interval (secs) | 0.0 |
+| Inventory | 0 Array elements |
+| Max Slots | 20 |
+| Component Replicates | false |
+| Auto Activate | false |
+| Is Editor Only | false |
+| Editable when Inherited | true |
+ 
+#### Event Graph
+- Event Begin Play — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
+ 
+#### AddItem (Function)
+**Graph:** BP_InventoryComponent > AddItem
+**Access:** Public
+**Inputs:** Item (S_ItemData)
+**Outputs:** Success (Boolean)
+ 
+**Logic:**
+1. **For Each Loop** — iterates over Inventory array
+   - **Break S_ItemData** (existing slot) → Item ID, Item Name, Max Stack Size
+   - **Break S_ItemData** (incoming Item) → Item ID, Item Name, Item Icon, Quantity, Max Stack Size, Item Type
+ 
+2. **Branch 1** — `existing Item ID == incoming Item ID`
+   - **True** → **Branch 2** — `existing Quantity < Max Stack Size` (stack not full)
+     - **True** → **Set Array Elem** — updates existing slot with merged quantity (`existing Quantity + incoming Quantity`)
+       - Target Array: Inventory
+       - Index: Array Index (from loop)
+       - Sets all fields: Item ID, Item Name, Item Icon, Quantity, Max Stack Size, Item Type, Size to Fit
+       → **Return Node** (Success: true)
+     - **False** → continues loop (stack full, look for another slot)
+ 
+3. **For Each Loop Completed** (no matching stack found) →
+   - **LENGTH** — gets current Inventory array length
+   - **Branch 3** — `Length < MaxSlots` (inventory has space)
+     - **True** → **ADD** — appends Item to Inventory array
+       → **Return Node** (Success: true)
+     - **False** → **Return Node** (Success: false — inventory full)
+ 
+---
+ 
+### S_ItemData (Struct)
+**Location:** CombatSystem/UI/Inventory
+ 
+| Field | Type | Note |
+|---|---|---|
+| ItemID | Name | Unique identifier for the item |
+| ItemName | Text | Display name |
+| ItemIcon | Texture 2D | Icon image |
+| Quantity | Integer | Current stack quantity |
+| MaxStackSize | Integer | Maximum stack size |
+| ItemType | Integer | Item type identifier |
+ 
+#### Default Values
+| Field | Default |
+|---|---|
+| ItemID | None |
+| ItemName | (empty) |
+| ItemIcon | None |
+| Quantity | 0 |
+| MaxStackSize | 0 |
+| ItemType | 0 |
+ 
+---
+ 
+### WBP_ItemSlot (Widget Blueprint)
+**Parent Class:** User Widget
+**Location:** CombatSystem/UI/Inventory
+ 
+#### Widget Hierarchy
+```
+[WBP_ItemSlot]
+└── Canvas Panel
+    ├── Image_ItemIcon
+    └── Text_Quantity "1"
+```
+ 
+#### Variables
+| Name | Type |
+|---|---|
+| Image_ItemIcon | Image (widget reference) |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Color and Opacity | White |
+| Foreground Color | Magenta/Pink |
+| Padding | 0.0 |
+| Visibility | Not Hit-Testable |
+| Pivot | (0.5, 0.5) |
+| Render Opacity | 1.0 |
+| Slot | None |
+| Navigation | None |
+ 
+#### Event Graph
+- Event Pre Construct — disabled (no logic yet)
+- Event Construct — disabled (no logic yet)
+- Event Tick — disabled (no logic yet)
+ 
+---
+ 
+---
+ 
+## Weapons
+ 
+---
+ 
+### BP_Weapon_BlackKnightSword (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** CombatSystem/Weapons
+ 
+#### Components
+```
+DefaultSceneRoot
+└── WeaponMesh (Skeletal Mesh)
+    └── WeaponHitBox (Box Collision)
+```
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| Other Actor | Actor | Last actor that overlapped the hitbox |
+| Previous_Start_Location | Vector | Weapon tip start position from last tick |
+| Previous_End_Location | Vector | Weapon tip end position from last tick |
+| AlreadyHitActors | Array of Actor | Actors hit during current swing (prevents multi-hit) |
+| bCanTraceAttack | Boolean | Whether the weapon is actively tracing |
+| Impact Point | Vector | World position of the last hit |
+| Pawn | EObject Type | Owner pawn reference |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Can Trace Attack | false |
+| Previous Start Location | (0.0, 0.0, 0.0) |
+| Previous End Location | (0.0, 0.0, 0.0) |
+| Impact Point | (0.0, 0.0, 0.0) |
+| Pawn | 1 Array element |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+| Auto Receive Input | Disabled |
+ 
+#### Event Graph
+ 
+##### Event Tick
+1. **Branch** — Condition: `bCanTraceAttack`
+   - **False** → end
+   - **True** → **Sphere Trace For Objects**
+     - Start: Previous_Start_Location
+     - End: Get Socket Location (WeaponMesh, `"Start"`)
+     - Radius: 10.0
+     - Ignore Self: true
+     - Pawn: (owner pawn)
+2. **Break Hit Result** → checks `Hit` pin
+3. **Branch** — Condition: Hit (blocking hit registered)
+   - **False** → end
+   - **True** → **CONTAINS** (Already Hit Actors, Other Actor)
+     - If NOT contains → **ADD** Other Actor to Already Hit Actors
+     - **SET** Impact Point
+     → **On Weapon Hit** (custom event dispatcher)
+       - Target: weapon component
+       - Hit Actor
+       - Hit Location
+ 
+##### On Component Begin Overlap (WeaponHitBox)
+1. **SET** Other Actor ← Overlapped Other Actor
+2. **Branch** — Condition: `Other Actor != Get Owner (self)`
+   - **True** → **Start Attack Trace** (Target: self)
+   - **False** → **Stop Attack Trace** (Target: self)
+ 
+##### StartAttackTrace (Custom Event)
+1. **SET** `bCanTraceAttack` = true
+2. **CLEAR** AlreadyHitActors array
+3. **Get Socket Location** (WeaponMesh, `"Start"`) → **SET** Previous_Start_Location
+4. **Get Socket Location** (WeaponMesh, `"End"`) → **SET** Previous_End_Location
+ 
+##### StopAttackTrace (Custom Event)
+1. **SET** `bCanTraceAttack` = false
+ 
+---
+ 
+---
+ 
+## Dungeon System
+ 
+---
+ 
+### BP_DoorActor (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** DungeonSystem/Core/Doors
+ 
+#### Components
+```
+DoorRoot (Scene Component)
+├── DoorFrame (Static Mesh)
+├── DoorLight (Light)
+├── DoorMesh (Static Mesh)
+└── TriggerZone (Box Collision)
+```
+ 
+#### Variables
+| Category | Name | Type | Note |
+|---|---|---|---|
+| Door State | DoorState | E_DoorState | Current state of the door |
+| Room Setup | NextRoomClass | Actor | Class of the next room to spawn |
+| Room Setup | NextRoomSpawnData | S_RoomSpawnData | Spawn data for the next room |
+| References | OwningRoom | BP_RoomBase | The room this door belongs to |
+| References | NewRoom | Actor | Reference to the spawned next room |
+| State | bIsTransitioning | Boolean | Whether a room transition is in progress |
+| Settings | DoorOpenOffset | Vector | Offset applied when door opens |
+| Settings | TransitionDelay | Float | Delay before transitioning to next room |
+| Settings | DoorStartLocation | Vector | Initial world location of the door mesh |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | Sets up door on placement |
+| LockDoor | Sets door state to Locked |
+| UnlockDoor | Sets door state to Unlocked |
+| OpenDoor | Opens the door (plays animation/movement) |
+| TransitionToNextRoom | Handles room transition logic |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Door State | Locked |
+| Is Transitioning | false |
+| Door Open Offset | (0.0, 0.0, 0.0) |
+| Transition Delay | 1.0 |
+| Door Start Location | (0.0, 0.0, 0.0) |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+ 
+##### Event BeginPlay
+1. **Lock Door** (Target: self)
+ 
+##### On Component Begin Overlap (TriggerZone)
+1. **Cast To BP_ThirdPersonCharacter** (Object: Other Actor)
+2. **Branch** — Condition: `Door State == Unlocked`
+   - **True** → **Open Door** (Target: self)
+   - **False** → end
+ 
+##### EnableTriggerZone (Custom Event)
+1. **Set Collision Enabled** (Target: TriggerZone)
+   - New Type: Query Only (No Physics Collision)
+ 
+---
+ 
+#### LockDoor (Function)
+**Graph:** BP_DoorActor > LockDoor
+ 
+**Logic:**
+1. **SET** `Door State` = `Locked`
+2. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Red
+   - SRGB: true
+3. **Set Collision Enabled** (Target: DoorMesh)
+   - New Type: No Collision
+ 
+---
+ 
+#### UnlockDoor (Function)
+**Graph:** BP_DoorActor > UnlockDoor
+ 
+**Logic:**
+1. **Branch** — Condition: `Door State == Locked`
+   - **False** → **Print String** — `"Door already unlocked or open"` *(Development Only)*
+   - **True** →
+2. **SET** `Door State` = `Unlocked`
+3. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Green
+   - SRGB: true
+4. **Create Event** — Signature: `EnableTriggerZone()` (Target: self)
+5. **Set Timer by Event**
+   - Event: EnableTriggerZone (via Create Event)
+   - Time: 3.0
+   - Looping: false
+   - Max Once Per Frame: false
+ 
+> Unlocks the door, turns the light green, then enables the trigger zone after a 3 second delay.
+ 
+---
+ 
+#### OpenDoor (Function)
+**Graph:** BP_DoorActor > OpenDoor
+ 
+**Logic:**
+1. **Branch** — Condition: `Door State == Unlocked`
+   - **False** → **Return Node** (early exit)
+   - **True** →
+2. **SET** `Door State` = `Opened`
+3. **Set Visibility** (Target: DoorMesh)
+   - New Visibility: false (hidden)
+   - Propagate to Children: false
+4. **Set Light Color** (Target: DoorLight)
+   - New Light Color: Blue
+   - SRGB: true
+5. **Transition to Next Room** (Target: self)
+ 
+> Only opens if Unlocked. Hides the door mesh, turns the light blue, then triggers the room transition.
+ 
+---
+ 
+#### TransitionToNextRoom (Function)
+**Graph:** BP_DoorActor > TransitionToNextRoom
+ 
+**Logic:**
+1. **Get All Actors Of Class**
+   - Actor Class: BP_DungeonGenerator
+   - Out Actors → **GET** [0] (first element)
+2. **Is Valid** (Input Object: BP_DungeonGenerator reference)
+   - **Is Valid** → **On Room Completed** (Target: BP_DungeonGenerator)
+     → **Print String** — `"Notifying generator"` *(Development Only)*
+   - **Is Not Valid** → **Print String** — `"ERROR: No generator found"` *(Development Only)*
+     → **Return Node**
+ 
+> Finds the BP_DungeonGenerator in the level and calls On Room Completed on it. Prints an error and exits early if no generator is found.
+ 
+---
+ 
+---
+ 
+### BP_DungeonGenerator (Actor Blueprint)
+**Parent Class:** Actor
+**Location:** DungeonSystem/Core/Generator
+ 
+#### Components
+```
+GeneratorRoot (Scene Component)
+```
+ 
+#### Variables
+| Category | Name | Type | Note |
+|---|---|---|---|
+| Floor Data | CurrentFloorNumber | Integer | Current floor being generated |
+| Floor Data | RoomSequence | Array of E_RoomType | Sequence of room types for this floor |
+| Floor Data | CurrentRoomIndex | Integer | Index of the current active room |
+| Floor Data | CurrentBandData | S_FloorBandData | Band data for current floor segment |
+| Floor Data | bCanTransition | Boolean | Whether a room transition is allowed |
+| References | ActiveRoom | Actor | Reference to the currently active room |
+| Settings | MinRoomsBeforeBoss | Integer | Minimum rooms before boss spawns |
+| Settings | MaxRoomsBeforeBoss | Integer | Maximum rooms before boss spawns |
+| Settings | FloorBandTable | Data Table | Data table defining floor bands |
+| Settings | RoomClasses | Array of Actor | All available room classes |
+| Settings | CombatRoomClass | Actor | Class to spawn for combat rooms |
+| Settings | LootRoomClass | Actor | Class to spawn for loot rooms |
+| Settings | SavePointRoomClass | Actor | Class to spawn for save point rooms |
+| Settings | BossRoomClass | Actor | Class to spawn for boss rooms |
+| Settings | RoomSpawnLocation | Vector | World location where rooms are spawned |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | |
+| GetFloorBandData | Retrieves band data for the current floor |
+| RollRoomSequence | Randomly generates the room type sequence |
+| BuildRoomSpawnData | Builds spawn data for the next room |
+| GetRoomClassForType | Returns the room class matching a given E_RoomType |
+| SpawnNextRoom | Spawns the next room in the sequence |
+| StartFloor | Initialises and starts generating a floor |
+| OnRoomCompleted | Called by BP_DoorActor when a room is cleared |
+| OnFloorComplete | Called when all rooms on the floor are done |
+| EnableTransition | Enables room transition flag |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Current Floor Number | 1 |
+| Room Sequence | 0 Array elements |
+| Current Room Index | 0 |
+| B Can Transition | false |
+| Min Rooms Before Boss | 8 |
+| Max Rooms Before Boss | 12 |
+| Floor Band Table | None |
+| Room Spawn Location | (0.0, 0.0, 0.0) |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+ 
+##### Event BeginPlay
+1. **Print String** — `"Dungeon Generator Ready"` *(Development Only)*
+2. **Start Floor** (Target: self)
+ 
+---
+ 
+#### GetFloorBandData (Function)
+**Graph:** BP_DungeonGenerator > GetFloorBandData
+**Access:** Public
+**Output:** Output_Get (S_FloorBandData)
+ 
+**Logic:**
+1. Compute band index from `Current Floor Number` using integer math (divides by 10 to group floors into bands)
+2. **Append** — builds row name: `"Band_"` + computed band index (e.g. `"Band_0"`, `"Band_1"`)
+3. **Branch** — Condition: `Current Floor Number >= 90`
+   - **True** (final band) → **Get Data Table Row** (DT_FloorBands)
+     - Row Name: computed row name
+     - **Row Found** → **SET** `CurrentBandData` = Out Row → **Return Node** (Output_Get: CurrentBandData)
+     - **Row Not Found** → **Print String** `"ERROR: Band row not found"` *(Development Only)*
+   - **False** (standard band) → **Get Data Table Row** (DT_FloorBands)
+     - Row Name: computed row name
+     - **Row Found** → **SET** `CurrentBandData` = Out Row → **Return Node** (Output_Get: CurrentBandData)
+     - **Row Not Found** → **Print String** `"ERROR: Band row not found"` *(Development Only)*
+ 
+> Looks up the current floor's band data from DT_FloorBands using a row name built from the floor number (e.g. floor 1-9 = Band_0, 10-19 = Band_1). Floors 90+ use a separate branch for the final band cap.
+ 
+---
+ 
+#### RollRoomSequence (Function)
+**Graph:** BP_DungeonGenerator > RollRoomSequence
+ 
+**Logic:**
+1. **CLEAR** Room Sequence array
+2. **Random Integer in Range** (Min: MinRoomsBeforeBoss, Max: MaxRoomsBeforeBoss) → **SET** Total Rooms
+3. **Print String** — `"Total Number of Rooms: [Total Rooms]"` *(Development Only)*
+4. **For Loop** (0 to Total Rooms - 1)
+   - Loop Body → **ADD** `Combat` to Room Sequence
+5. **SET** Num Loot Rooms = **Random Integer in Range** (Min: 1, Max: 2)
+6. **For Loop** (0 to Num Loot Rooms - 1) — inserts loot rooms at random positions
+   - **SET** Insert Index = **Random Integer in Range** (Min: 1, Max: Room Sequence LENGTH - 1)
+   - **INSERT** `Loot` at Insert Index in Room Sequence
+7. After loot loop **Completed** → **Branch**: `Room Sequence LENGTH >= 4`
+   - **True** (enough rooms for a save point):
+     - **SET** Insert Index = **Random Integer in Range** (Min: 2, Max: Room Sequence LENGTH - 2)
+     - **INSERT** `SavePoint` at Insert Index in Room Sequence
+     - **ADD** `Boss` to Room Sequence
+   - **False** (not enough rooms):
+     - **Print String** — `"HellWARNING: Not enough rooms to place SavePoint"` *(Development Only)*
+     - **ADD** `Boss` to Room Sequence
+ 
+> Builds the full room sequence for a floor: fills with Combat rooms, splices in 1-2 Loot rooms at random positions, inserts a SavePoint in the middle if there's room, then appends the Boss at the end.
+ 
+---
+ 
+#### BuildRoomSpawnData (Function)
+**Graph:** BP_DungeonGenerator > BuildRoomSpawnData
+**Input:** In Room Type (E_RoomType)
+**Output:** S_RoomSpawnData
+ 
+**Logic:**
+1. **Get Floor Band Data** (Target: self)
+   - Used outputs: Min Enemies Per Room, Max Enemies Per Room, Loot Chest Chance, Trap Chance, Prop Density Min, Prop Density Max
+2. **Random Integer in Range** (Min: Min Enemies Per Room, Max: Max Enemies Per Room) → **SET** Rand Enemy Count
+3. **Random Float in Range** (Min: Prop Density Min, Max: Prop Density Max) → **SET** Rand Prop Density
+4. **Random Float** `<=` Loot Chest Chance → **SET** Has Loot Chest Result (Boolean)
+5. **Random Float** `<=` Trap Chance → **SET** Has Trap Result (Boolean)
+6. **Make Array** `[BP_TestEnemy]` → Enemy Types array
+7. **Literal Enum E_RoomType** `Boss` `==` In Room Type → Is Final Room (Boolean)
+8. **Make S Room Spawn Data**
+   - Room Type: In Room Type
+   - Floor Number: Current Floor Number
+   - Enemy Count: Rand Enemy Count
+   - Enemy Types: [BP_TestEnemy]
+   - Has Loot Chest: Has Loot Chest Result
+   - Has Trap: Has Trap Result
+   - Prop Density: Rand Prop Density
+   - Is Final Room: `In Room Type == Boss`
+9. **SET** Out Data = Make S Room Spawn Data result → **Return Node**
+ 
+> Samples the current floor band to roll all room parameters, then packages them into an S_RoomSpawnData struct. Boss rooms are flagged as the final room automatically.
+ 
+---
+ 
+#### GetRoomClassForType (Function)
+**Graph:** BP_DungeonGenerator > GetRoomClassForType
+**Input:** In Room Type (E_RoomType)
+**Output:** Actor Class
+ 
+**Logic:**
+1. **Switch on E_RoomType** (Selection: In Room Type)
+   - `Combat` → **Return Node** (Return Value: CombatRoomClass)
+   - `Loot` → **Return Node** (Return Value: LootRoomClass)
+   - `Save Point` → **Return Node** (Return Value: SavePointRoomClass)
+   - `Boss` → **Return Node** (Return Value: BossRoomClass)
+ 
+> Simple switch that maps each E_RoomType enum value to the corresponding room class variable.
+ 
+---
+ 
+#### SpawnNextRoom (Function)
+**Graph:** BP_DungeonGenerator > SpawnNextRoom
+ 
+**Logic:**
+1. **SET** `bCanTransition` = false
+2. **Branch** — Condition: `CurrentRoomIndex < LENGTH of Room Sequence`
+   - **False** → **Print String** `"ERROR: No more rooms in sequence"` *(Dev Only)* → **Return Node**
+   - **True** →
+3. **GET** `Room Sequence[CurrentRoomIndex]` → **SET** Next Room Type
+4. **Get Room Class for Type** (Target: self, In Room Type: Next Room Type) → **SET** Next Room Class
+5. **Is Valid Class** (Class: Next Room Class)
+   - **False** → **Print String** `"ERROR: Room class not assigned"` *(Dev Only)* → **Return Node**
+   - **True** →
+6. **Build Room Spawn Data** (Target: self, In Room Type: Next Room Type) → **SET** Spawn Data
+7. **Spawn Actor** (Class: Next Room Class, Location: RoomSpawnLocation, Rotation: 0,0,0, Scale: 1,1,1, Collision: Default) → Spawned Room Actor
+8. **SET** Spawned Room Actor
+9. **Is Valid** (Object: Spawned Room Actor)
+   - **False** → **Print String** `"ERROR: Room failed to spawn"` *(Dev Only)* → **Return Node**
+   - **True** → **SET** Active Room = Spawned Room Actor
+10. **Cast To BP_RoomBase** (Object: Active Room)
+    - **Cast Failed** → **Print String** `"ERROR: Room failed to spawn"` *(Dev Only)* → **Return Node**
+11. **Setup Room** (Target: BP_RoomBase, In Spawn Data: Spawn Data)
+12. **Cast To BP_DoorActor** (from room's child actor) → Door Actor
+13. **Get Room Class for Type** (In Room Type: `Room Sequence[CurrentRoomIndex]`) → **SET** Next Room Class (on door)
+14. **Build Room Spawn Data** (In Room Type: `Room Sequence[CurrentRoomIndex]`) → **SET** Next Room Spawn Data (on door)
+15. **SET** `Current Room Index` = Current Room Index + 1
+16. **Set Timer by Function Name**
+    - Object: self
+    - Function Name: `"EnableTransition"`
+    - Time: 2.0
+    - Looping: false
+ 
+> Validates the sequence has rooms remaining, spawns the next room at RoomSpawnLocation, sets it up with generated spawn data, wires the door to the following room's class and data, increments the room index, then enables transition after a 2 second delay.
+ 
+---
+ 
+#### StartFloor (Function)
+**Graph:** BP_DungeonGenerator > StartFloor
+ 
+**Logic:**
+1. **SET** `Current Room Index` = 0
+2. **SET** `Active Room` = null (cleared)
+3. **Roll Room Sequence** (Target: self)
+4. **Spawn Next Room** (Target: self)
+ 
+> Resets the room index and active room reference, generates a fresh room sequence for the floor, then spawns the first room.
+ 
+---
+ 
+#### OnRoomCompleted (Function)
+**Graph:** BP_DungeonGenerator > OnRoomCompleted
+ 
+**Logic:**
+1. **Branch** — Condition: `bCanTransition == true`
+   - **False** → **Print String** `"Can't Transition"` *(Dev Only)* → **Return Node**
+   - **True** →
+2. **Cast To BP_Room_Boss** (Object: Active Room)
+   - **Cast Succeeded** → **Print String** `"Boss room - skipping OnRoomCompleted"` *(Dev Only)*
+   - **Cast Failed** → (continues)
+3. **Branch** — Condition: `Room State == Cleared`
+   - **False** → **Print String** `"Room not cleared yet - ignoring"` *(Dev Only)* → **Return Node**
+   - **True** → **Print String** `"OnRoomCompleted Fired"` + `CurrentRoomIndex/LENGTH of Room Sequence` *(Dev Only)*
+4. **SET** `Character` = **Get Player Character** (Player Index: 0)
+5. **Is Valid** (Input Object: Active Room)
+   - **Is Not Valid** → **Return Node**
+   - **Is Valid** →
+6. **Destroy Actor** (Target: Active Room)
+7. **Get All Actors Of Class** (BP_TestEnemy) → **For Each Loop** → **Destroy Actor** each
+8. **Get All Actors Of Class** (BP_TestBoss) → **For Each Loop** → **Destroy Actor** each
+9. **SET** `Active Room` = null (cleared)
+10. **Branch** — Condition: `Current Room Index >= LENGTH of Room Sequence`
+    - **True** → **On Floor Complete** (Target: self) → **Return Node**
+    - **False** → **Spawn Next Room** (Target: self)
+11. **Is Valid** (Input Object: Active Room [newly spawned])
+    - **Is Not Valid** → **Print String** `"ERROR: New room invalid"` *(Dev Only)*
+    - **Is Valid** →
+      - **Print String** `"Player moved to new room"` *(Dev Only)*
+      - **Get Actor Location** (Target: Active Room) + offset (X: 0, Y: 0, Z: 100)
+      - **Set Actor Location** (Target: Character, New Location: Active Room location + Z100)
+ 
+> Guards against transitioning when not allowed or room not cleared. Destroys the old room and all enemies, then either completes the floor or spawns the next room and teleports the player to it (+100 Z offset).
+ 
+---
+ 
+#### OnFloorComplete (Function)
+**Graph:** BP_DungeonGenerator > OnFloorComplete
+ 
+**Logic:**
+1. **Branch** — Condition: **Is Valid** (Active Room)
+   - **False** → (skips destroy, continues)
+   - **True** → **Destroy Actor** (Target: Active Room)
+2. **Get All Actors Of Class** (BP_TestEnemy) → **For Each Loop** → **Destroy Actor** each
+3. **Get All Actors Of Class** (BP_TestBoss) → **For Each Loop** → **Destroy Actor** each
+4. **SET** `Active Room` = null (cleared)
+5. **SET** `Current Floor Number` = Current Floor Number + 1
+6. **Print String** — `"FLOOR COMPLETE! Starting Floor: "` + new Current Floor Number *(Dev Only)*
+7. **Start Floor** (Target: self)
+ 
+> Cleans up the active room and all remaining enemies/bosses, increments the floor counter, then starts the next floor.
+ 
+---
+ 
+#### EnableTransition (Function)
+**Graph:** BP_DungeonGenerator > EnableTransition
+ 
+**Logic:**
+1. **SET** `bCanTransition` = true
+ 
+> Called by the timer in SpawnNextRoom (2s delay) to allow the player to trigger the next room transition.
+ 
+---
+ 
+---
+ 
+### BP_Room_Boss (Actor Blueprint)
+**Parent Class:** BP_RoomBase
+**Location:** DungeonSystem/Core/Rooms
+ 
+#### Components
+```
+RoomRoot
+├── BossSpawn
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+ 
+#### Variables
+| Name | Type | Note |
+|---|---|---|
+| BossClass | Actor | Class of the boss to spawn |
+| SpawnedBoss | Actor | Reference to the spawned boss |
+| bBossDefeated | Boolean | Whether the boss has been defeated |
+| bBossSpawned | Boolean | Whether the boss has been spawned |
+ 
+#### Functions
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises the room with spawn data |
+| SpawnBoss | Spawns the boss at BossSpawn location |
+| OnBossDefeated | Called when the boss dies |
+| SpawnEnemies | Spawns regular enemies |
+| OnRoomCleared | Called when all enemies/boss are defeated |
+| OnEnemyDied | Called when an individual enemy dies |
+ 
+#### Class Defaults
+| Property | Value |
+|---|---|
+| Boss Class | BP_Ty... (assigned) |
+| Boss Defeated | false |
+| Boss Spawned | false |
+| On Room Finished | 0 |
+| Room Type | Boss |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+ 
+#### Event Graph
+- **Event BeginPlay** → **Parent_BeginPlay** (calls parent implementation)
+- **Event ActorBeginOverlap** → **Parent_ActorBeginOverlap** — disabled (no logic yet)
+- **Event Tick** → **Parent_Tick** — disabled (no logic yet)
+ 
+---
+ 
+#### SetupRoom (Function)
+**Graph:** BP_Room_Boss > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+ 
+**Logic:**
+1. **Parent: SetupRoom** (In Spawn Data: In Spawn Data) — calls parent implementation
+2. **SET** `Enemies Alive` = 1 (the boss counts as 1 enemy)
+3. **Spawn Boss** (Target: self)
+4. **Print String** — `"Boss Room Initialized"` *(Development Only)*
+ 
+---
+ 
+#### SpawnBoss (Function)
+**Graph:** BP_Room_Boss > SpawnBoss
+ 
+**Logic:**
+1. **Branch** — Condition: `bBossSpawned`
+   - **True** → **Return Node** (already spawned, exit early)
+   - **False** →
+2. **SET** `bBossSpawned` = true
+3. **Spawn Actor**
+   - Class: BossClass
+   - Location: **Get World Location** (BossSpawn) + offset (X: 0, Y: 0, Z: 100)
+   - Rotation: **Get World Rotation** (BossSpawn)
+   - Scale: (1.0, 1.0, 1.0)
+   - Collision: Always Spawn, Ignore Collisions
+4. **SET** `Spawned Boss` = Return Value
+5. **Is Valid** (Input Object: Spawned Boss)
+   - **Is Not Valid** → **Print String** `"ERROR: Boss failed to spawn"` *(Dev Only)*
+   - **Is Valid** →
+6. **SET** `Enemies Alive` = 1
+7. **Cast To BP_TestBoss** (Object: Spawned Boss)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+8. **SET** `Owning Room` = self (Target: As BP_TestBoss)
+9. **Print String** `"Boss Spawned Successfully"` *(Dev Only)*
+ 
+---
+ 
+#### OnBossDefeated (Function)
+**Graph:** BP_Room_Boss > OnBossDefeated
+ 
+**Logic:**
+1. **Print String** — `"Boss Defeated"` *(Dev Only)*
+2. **SET** `Enemies Alive` = 0
+3. **Print String** — `"EnemiesAlive set"` *(Dev Only)*
+4. **SET** `Room State` = `Cleared`
+5. **Print String** — `"RoomState set"` *(Dev Only)*
+6. **Get All Actors Of Class** (BP_DungeonGenerator) → **GET** [0]
+7. **On Floor Complete** (Target: BP_DungeonGenerator)
+8. **Print String** — `"Floor Complete!"` *(Dev Only)*
+ 
+> Called by the boss when it dies. Clears the room state and directly calls OnFloorComplete on the generator (bypasses OnRoomCompleted since boss rooms end the floor).
+ 
+---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Boss > OnRoomCleared
+
+**Logic:**
+1. **Print String** — `"Boss OnRoomCleared fired"` *(Dev Only)*
+2. **Parent: OnRoomCleared** — calls parent implementation
+3. **Get All Actors Of Class** (Actor Class: BP_DungeonGenerator) → **GET** [0]
+4. **On Floor Complete** (Target: BP_DungeonGenerator)
+5. **Print String** — `"Floor Complete!"` *(Dev Only)*
+
+> Boss room override of OnRoomCleared — calls parent then directly triggers OnFloorComplete on the generator, since clearing the boss room ends the floor.
+
+---
+
+#### OnEnemyDied (Function)
+**Graph:** BP_Room_Boss > OnEnemyDied
+
+**Logic:**
+1. **Branch** — Condition: `bBossSpawned == true`
+   - **False** → **Print String** `"Ignored - boss not spawned yet"` *(Dev Only)* → end
+   - **True** →
+2. **SET** `Enemies Alive` = `Enemies Alive - 1`
+3. **Print String** *(Dev Only)* — compound string via **Append** nodes: `"Boss EnemiesAlive: " + [Enemies Alive value]`
+4. **Branch** — Condition: `Enemies Alive <= 0`
+   - **False** → end
+   - **True** →
+5. **Print String** — `"Boss Enemy Died"` *(Dev Only)*
+6. **SET** `Boss Defeated` = true
+7. **SET** `Room State` = `Cleared`
+8. **Get All Actors Of Class** (BP_DungeonGenerator) → **GET** [0]
+9. **On Floor Complete** (Target: BP_DungeonGenerator)
+
+> Guards against calls before the boss spawns. Decrements enemy count and, when all enemies are gone, marks the boss as defeated, sets room to Cleared, and triggers OnFloorComplete on the generator.
+
+---
+
+#### SpawnEnemies (Function)
+**Graph:** BP_Room_Boss > SpawnEnemies
+
+**Logic:**
+1. **Spawn Boss** (Target: self)
+
+> Boss room override — delegates directly to SpawnBoss rather than spawning regular enemies.
+
+---
+
+---
+
+## BP_Room_Combat
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Combat room — spawns enemies and props; player must defeat all enemies to clear the room.
+
+---
+
+### Components
+
+```
+BP_Room_Combat (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| OnRoomCleared | Called when all enemies are defeated |
+
+---
+
+### Event Graph
+- **Event BeginPlay** (present)
+- **Event ActorBeginOverlap** (present)
+- **Event Tick** (present)
+- **NotifyRoomCleared** (custom event)
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| On Room Finished | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Room Type | Combat |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
+
+#### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **Print String** — `"Combat Room Loaded"` *(Dev Only)*
+
+---
+
+**NotifyRoomCleared** *(Custom Event):*
+1. **Call On Room Finished** (Target: self)
+2. **Print String** — `"Combat Room Cleared — Notifying Generator"` *(Dev Only)*
+
+---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Combat > OnRoomCleared
+
+**Logic:**
+1. **Parent: OnRoomCleared** — calls parent implementation
+2. **Notify Room Cleared** (Target: self)
+
+---
+
+---
+
+## BP_Room_Loot
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Loot room — no enemies; doors open immediately after a short delay. Used for reward/chest rooms between combat floors.
+
+---
+
+### Components
+
+```
+BP_Room_Loot (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises room with spawn data |
+| OnRoomCleared | Called when room is cleared |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Room Type | Loot |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| On Room Finished | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **SET** `Enemies Alive` = 0
+3. **Delay** (Duration: 1.0s)
+4. **On Room Cleared** (Target: self)
+5. **Print String** — `"Loot Room — No enemies, doors open immediately"` *(Dev Only)*
+
+> Loot rooms have no enemies, so OnRoomCleared is called automatically after a 1-second delay on BeginPlay.
+
+---
+
+#### SetupRoom (Function)
+**Graph:** BP_Room_Loot > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+
+**Logic:**
+1. **Parent: SetupRoom** (In Spawn Data: In Spawn Data)
+2. **SET** `Has Chest` = true
+3. **Spawn Chest** (Target: self)
+4. **Print String** — `"Loot Room Loaded — Chest Guaranteed"` *(Dev Only)*
+
+---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_Room_Loot > OnRoomCleared
+
+**Logic:**
+1. **Parent: OnRoomCleared**
+2. **Call On Room Finished** (Target: self)
+3. **Print String** — `"Loot Room Cleared"` *(Dev Only)*
+
+---
+
+---
+
+## BP_Room_SavePoint
+
+**Parent Class:** BP_Room_Base
+**Type:** Actor Blueprint
+**Purpose:** Save point room — no enemies; auto-clears on BeginPlay and prompts the player to spend Essences to save/heal when they enter RoomBounds.
+
+---
+
+### Components
+
+```
+BP_Room_SavePoint (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Variables
+| Name | Type | Notes |
+|---|---|---|
+| bEssenceSaved | Boolean | Whether the player has already used this save point |
+| EssenceCost | Integer | Essence cost to activate the save point |
+| HealthPenaltyPct | Float | Health penalty percentage applied on use |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| TryActivateSavePoint | Attempts to activate the save point for the player |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Parent: BeginPlay**
+2. **SET** `Enemies Alive` = 0
+3. **Delay** (Duration: 1.0s)
+4. **On Room Cleared** (Target: self)
+5. **Print String** — `"Save Point Room Ready"` *(Dev Only)*
+
+---
+
+**On Component Begin Overlap (RoomBounds):**
+1. **Cast To BP_ThirdPersonCharacter** (Object: Other Actor)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+2. **Print String** — `"Press [E] to use Save Point — Costs 10 Essences"` *(Dev Only, Duration: 5.0s, Print to Screen: true, Print to Log: true)*
+
+---
+
+#### TryActivateSavePoint (Function)
+**Graph:** BP_Room_SavePoint > TryActivateSavePoint
+
+**Logic:**
+1. **Branch** — Condition: `bEssenceSaved == true`
+   - **True** → **Print String** `"Already saved at this point"` *(Dev Only)* → **Return Node**
+   - **False** →
+2. **Get Player Character** (Player Index: 0)
+3. **Cast To BP_ThirdPersonCharacter** (Object: Player Character)
+   - **Cast Failed** → end
+   - **Cast Succeeded** →
+4. **Get Component by Class** (Target: As BP_ThirdPersonCharacter, Component Class: BP_StatsComponent)
+5. **Is Valid** (Object: Stats Component)
+6. **Branch** — Condition: Is Valid
+   - **False** → **Print String** `"ERROR: Cannot find player stats"` *(Dev Only)* → **Return Node**
+   - **True** →
+7. **Print String** — `"Essence save attempted (System still needs to be built)"` *(Dev Only)*
+8. **SET** `Essence Saved` = true
+9. **Print String** — `"SAVE POINT ACTIVATED"` *(Dev Only)*
+
+> Save system is currently a stub — essence deduction and actual save logic not yet implemented. Guards against double-activation via `bEssenceSaved`.
+
+---
+
+---
+
+## BP_RoomBase
+
+**Parent Class:** Actor
+**Type:** Actor Blueprint
+**Purpose:** Base class for all room types. Defines the shared component hierarchy, variables, functions, and Event Graph logic that all room subclasses inherit and override.
+
+---
+
+### Components
+
+```
+BP_RoomBase (Self)
+├── RoomRoot
+├── ChestSpawnPoint
+├── DoorActor
+├── DoorSocketRoot
+│   └── DoorSocket_Exit
+├── EnemySpawnRoot
+│   ├── EnemySpawn_1
+│   ├── EnemySpawn_2
+│   ├── EnemySpawn_3
+│   ├── EnemySpawn_4
+│   ├── EnemySpawn_5
+│   └── EnemySpawn_6
+├── FloorMesh
+├── PropSpawnRoot
+│   ├── PropSpawn_1
+│   ├── PropSpawn_2
+│   ├── PropSpawn_3
+│   ├── PropSpawn_4
+│   ├── PropSpawn_5
+│   ├── PropSpawn_6
+│   ├── PropSpawn_7
+│   └── PropSpawn_8
+└── RoomBounds
+```
+
+---
+
+### Variables
+| Category | Name | Type |
+|---|---|---|
+| Room Setup | RoomType | E_RoomType |
+| Room Setup | RoomState | E_RoomState |
+| Room Setup | SpawnData | S_RoomSpawnData |
+| Room Setup | bHasChest | Boolean |
+| Room Setup | bHasTrap | Boolean |
+| Room Setup | ChestClass | Actor (class reference) |
+| Room Setup | bRoomInitialized | Boolean |
+| Tracking | EnemiesAlive | Integer |
+| Tracking | TotalEnemiesSpawned | Integer |
+| References | DoorsInRoom | Array of BP_DoorActor |
+| References | SpawnedEnemies | Array of Actor |
+| References | SpawnedProps | Array of Actor |
+| Components | DoorActor | Scene Component |
+| Components | ChestSpawnPoint | Scene Component |
+| Components | DoorSocketRoot | Scene Component |
+| Components | DoorSocket_Exit | Scene Component |
+| Components | EnemySpawnRoot | Scene Component |
+| Components | EnemySpawn_1–6 | Scene Component |
+| Components | PropSpawnRoot | Scene Component |
+| Components | PropSpawn_1–8 | Scene Component |
+| Components | RoomBounds | Scene Component |
+| Components | FloorMesh | Scene Component |
+| Components | RoomRoot | Scene Component |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| SetupRoom | Initialises the room with spawn data from the generator |
+| SpawnEnemies | Spawns enemies at EnemySpawn points |
+| SpawnProps | Spawns props at PropSpawn points |
+| SpawnChest | Spawns a chest at ChestSpawnPoint |
+| SpawnTrap | Spawns a trap in the room |
+| OnEnemyDied | Called when an individual enemy dies |
+| OnRoomCleared | Called when all enemies are defeated |
+| GetAllEnemySpawnPoints | Returns array of all EnemySpawn scene components |
+
+---
+
+### Event Dispatchers
+| Name | Note |
+|---|---|
+| OnRoomFinished | Broadcast when the room is fully complete |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| On Room Finished | 0 |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Room Type | Combat |
+| Room State | Locked |
+| Has Chest | false |
+| Has Trap | false |
+| Chest Class | None |
+| Room Initialized | false |
+| Enemies Alive | 0 |
+| Total Enemies Spawned | 0 |
+| Net Load on Client | true |
+| Net Dormancy | Awake |
+| Net Cull Distance Squared | 225000000.0 |
+| Net Update Frequency | 100.0 |
+| Min Net Update Frequency | 2.0 |
+| Net Priority | 1.0 |
+| Can be Damaged | true |
+| Initial Life Span | 0.0 |
+| Spawn Collision Handling | Always Spawn, Ignore Collisions |
+| Include Actor in HLOD | true |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Is Valid** (Input Object: DoorActor → Child Actor)
+   - **Is Valid** →
+     - **Cast To BP_DoorActor** (Object: Child Actor)
+       - **Cast Succeeded** → **ADD** to `Doors in Room` array (As BP_DoorActor) → **SET** `Owning Room` = self (on BP_DoorActor)
+       - **Cast Failed** → (falls through)
+   - **Is Not Valid** → (falls through)
+2. **SET** `Enemies Alive` = 0
+3. **SET** `Room State` = `Locked`
+4. **Print String** — `"BP_RoomBase Ready"` *(Dev Only)*
+
+---
+
+#### SetupRoom (Function)
+**Graph:** BP_RoomBase > SetupRoom
+**Input:** In Spawn Data (S_RoomSpawnData)
+
+**Logic:**
+1. **Branch** — Condition: `bRoomInitialized == true`
+   - **True** → **Return Node** (already set up, exit early)
+   - **False** →
+2. **SET** `bRoomInitialized` = true
+3. **SET** `SpawnData` = In Spawn Data — struct fields unpacked and routed:
+   - `Room Type` → **SET** `RoomType`
+   - `Has Loot Chest` → **SET** `bHasChest`
+   - `Has Trap` → **SET** `bHasTrap`
+   - `Enemy Count` → **SET** `EnemiesAlive`
+   - `Enemy Count` → **SET** `TotalEnemiesSpawned`
+4. **SET** `Room State` = `Active`
+5. **Spawn Enemies** (Target: self)
+6. **Spawn Props** (Target: self)
+7. **Branch** — Condition: `bHasChest`
+   - **True** → **Spawn Chest** (Target: self)
+   - **False** → (continue)
+8. **Branch** — Condition: `bHasTrap`
+   - **True** → **Spawn Trap** (Target: self)
+   - **False** → (continue)
+9. **Print String** — `"Room Setup Complete"` *(Dev Only)*
+
+> Base implementation called by all subclass overrides via `Parent: SetupRoom`. Unpacks the spawn data struct, sets room state to Active, then delegates to the individual spawn functions.
+
+---
+
+#### SpawnEnemies (Function)
+**Graph:** BP_RoomBase > SpawnEnemies
+
+**Logic:**
+1. **SET** `EnemiesAlive` = `SpawnData.EnemyCount`
+2. **SET** `TotalEnemiesSpawned` = `SpawnData.EnemyCount`
+3. **SET** `Available Spawn Points` = **Make Array** [EnemySpawn_1, EnemySpawn_2, EnemySpawn_3, EnemySpawn_4, EnemySpawn_5, EnemySpawn_6]
+4. **For Loop** (First Index: 0, Last Index: `EnemiesAlive - 1`)
+   - **Loop Body** →
+     - **SET** `Random Index` = random integer within `Available Spawn Points` length
+     - **GET** `Available Spawn Points[Random Index]` → **SET** `Selected Point`
+     - **Remove Index** `Random Index` from `Available Spawn Points` (prevents duplicate spawn points)
+     - **Branch** — Condition: `LENGTH(SpawnData.EnemyTypes) > 0`
+       - **False** → **Print String** `"No Enemys to Spawn"` *(Dev Only)* → end iteration
+       - **True** →
+     - **RANDOM** element from `SpawnData.EnemyTypes` → random enemy class
+     - **Get World Location** (Target: Selected Point)
+     - **Get World Rotation** (Target: Selected Point)
+     - **Spawn Actor**
+       - Class: random enemy class
+       - Location: Selected Point world location + (Z: +100)
+       - Rotation: Selected Point world rotation
+       - Scale: (1.0, 1.0, 1.0)
+       - Collision: Always Spawn, Ignore Collisions
+       - Transform Scale Method: Multiply Scale With Root Component Scale
+     - **SET** `Spawned Enemy` = Return Value
+     - **ADD** `Spawned Enemy` to `SpawnedEnemies` array
+   - **Completed** → **Print String** `"SpawnEnemies Complete"` *(Dev Only)*
+
+> Iterates once per enemy count, picking a random unique spawn point each iteration (removing used points from the pool). Enemy class is selected randomly from the `EnemyTypes` array in SpawnData.
+
+---
+
+#### SpawnProps (Function)
+**Graph:** BP_RoomBase > SpawnProps
+
+**Logic:**
+1. **Get World Location** (Target: ChestSpawnPoint)
+2. **Append** — `"Chest spawned at: "` + [world location vector]
+3. **Print String** — appended string *(Dev Only)*
+
+> Currently a stub — no props are actually spawned. Logs the ChestSpawnPoint world location for debugging.
+
+---
+
+#### SpawnChest (Function)
+**Graph:** BP_RoomBase > SpawnChest
+
+**Logic:**
+1. **Print String** — `"Chest Spawned"` *(Dev Only)*
+
+> Currently a stub — no chest actor is actually spawned yet.
+
+---
+
+#### SpawnTrap (Function)
+**Graph:** BP_RoomBase > SpawnTrap
+
+**Logic:**
+1. **Print String** — `"Trap spawned"` *(Dev Only)*
+
+> Currently a stub — no trap actor is actually spawned yet.
+
+---
+
+#### OnEnemyDied (Function)
+**Graph:** BP_RoomBase > OnEnemyDied
+
+**Logic:**
+1. **Print String** — `"OnEnemyDied called"` *(Dev Only)*
+2. **Branch** — Condition: `Enemies Alive > 0`
+   - **False** → **Return Node** (guard: already at 0, exit early)
+   - **True** →
+3. **SET** `Enemies Alive` = `Enemies Alive - 1`
+4. **Print String** *(Dev Only)* — **Append**: `"Now: "` + [Enemies Alive value]
+5. **Branch** — Condition: `Enemies Alive <= 0`
+   - **False** → end (enemies still remaining)
+   - **True** →
+6. **Print String** — `"Calling OnRoomCleared"` *(Dev Only)*
+7. **Branch** — Condition: `Enemies Alive <= 0` (secondary guard)
+   - **True** → **On Room Cleared** (Target: self)
+   - **False** → **Print String** `"Guard blocked"` *(Dev Only)* → **Return Node**
+
+> Decrements the enemy count on each death. Double-checks the count before calling OnRoomCleared to guard against race conditions or duplicate calls.
+
+---
+
+#### OnRoomCleared (Function)
+**Graph:** BP_RoomBase > OnRoomCleared
+
+**Logic:**
+1. **SET** `Room State` = `Cleared`
+2. **Print String** *(Dev Only)* — **Append**: `"Doors in room count: "` + **LENGTH**(`Doors in Room`)
+3. **For Each Loop** (Array: `Doors in Room`)
+   - **Loop Body** →
+     - **Is Valid** (Input Object: Array Element)
+       - **Is Valid** → **Unlock Door** (Target: Array Element as BP_DoorActor) → **Print String** `"Door Unlocked"` *(Dev Only)*
+       - **Is Not Valid** → **Print String** `"Invalid door reference"` *(Dev Only)*
+   - **Completed** → end
+
+> Base implementation. Sets room state to Cleared then iterates all doors in the room and unlocks each valid one.
+
+---
+
+#### GetAllEnemySpawnPoints (Function)
+**Graph:** BP_RoomBase > GetAllEnemySpawnPoints
+**Output:** Spawn Points Out (Array of Scene Component)
+
+**Logic:**
+1. **Make Array** [EnemySpawn_1, EnemySpawn_2, EnemySpawn_3, EnemySpawn_4, EnemySpawn_5, EnemySpawn_6]
+2. **Return Node** — `Spawn Points Out` = the array
+
+> Utility function that returns all 6 enemy spawn point scene components as an array. Used by SpawnEnemies to build the available spawn point pool.
+
+---
+
+---
+
+## BP_TestBoss
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** Placeholder boss character. Simulates a boss fight with a timer — auto-dies after 5 seconds and notifies the owning room.
+
+---
+
+### Components
+Default Character components: CapsuleComponent, Mesh (no mesh assigned), CharacterMovement
+
+---
+
+### Variables
+| Name | Type | Notes |
+|---|---|---|
+| OwningRoom | BP_RoomBase | Reference to the room that spawned this boss |
+| BossClass | BP_TestBoss | Self-referencing class variable |
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Animation Mode | Use Animation Blueprint |
+| Anim Class | None |
+| Skeletal Mesh Asset | None |
+| Boss Class | None |
+| Start with Tick Enabled | true |
+| Tick Interval | 0.0 |
+| Mobility | Movable |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Print String** — `"Boss Spawned"` *(Dev Only)*
+2. **Set Timer by Event** (Event: BossDieTimer, Time: 5.0s, Looping: false)
+
+---
+
+**BossDieTimer** *(Custom Event):*
+1. **Print String** — `"Boss Defeated"` *(Dev Only)*
+2. **Is Valid** (Input Object: `Owning Room`)
+   - **Is Valid** → **On Enemy Died** (Target: Owning Room) → **Destroy Actor** (Target: self)
+   - **Is Not Valid** → **Print String** `"OwningRoom is Null"` *(Dev Only)* → **Destroy Actor** (Target: self)
+
+> Placeholder implementation — boss dies automatically after 5 seconds via a timer. Always destroys self regardless of whether OwningRoom is valid.
+
+---
+
+---
+
+## BP_TestEnemy
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** Placeholder enemy character. Auto-dies after 5 seconds via a timer, then notifies the room via `OnEnemyDied` — but only if the room is in the `Active` state.
+
+---
+
+### Components
+Default Character components: CapsuleComponent, Mesh (no mesh assigned), CharacterMovement
+
+---
+
+### Variables
+None
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+
+---
+
+### Event Graph
+
+**Event BeginPlay:**
+1. **Print String** — `"Test Enemy Spawned"` *(Dev Only)*
+2. **Set Timer by Event** (Event: EnemyDieTimer, Time: 5.0s, Looping: false)
+
+---
+
+**EnemyDieTimer** *(Custom Event):*
+1. **Print String** — `"TIMER FIRED"` *(Dev Only)*
+2. **Get All Actors Of Class** (BP_Room_Base) → **GET** [0]
+3. **Is Valid** (Input Object: room actor)
+   - **Is Not Valid** → **Print String** `"No room found"` *(Dev Only)* → **Destroy Actor** (self)
+   - **Is Valid** →
+4. **Get Display Name** (Object: room actor)
+5. **Append** — `"Room State is: "` + **Enum to String** (room actor's `Room State`)
+6. **Print String** *(Dev Only)* — the appended room state string
+7. **Branch** — Condition: `Room State == Active`
+   - **True** → **On Enemy Died** (Target: room actor as BP_RoomBase) → **Destroy Actor** (self) → **Print String** `"TestEnemy Destroyred"` *(Dev Only)*
+   - **False** → **Destroy Actor** (self) *(silently, room not active)*
+
+> Uses `Get All Actors Of Class` to find the room rather than a stored reference. Only calls `OnEnemyDied` if the room is still Active, preventing stale death notifications.
+
+---
+
+---
+
+## DT_FloorBands
+
+**Type:** Data Table
+**Row Struct:** S_FloorBandData
+**Purpose:** Defines difficulty scaling bands by floor range. Used by `BP_DungeonGenerator > GetFloorBandData` to look up spawn parameters for the current floor.
+
+---
+
+### Columns
+| Field | Type | Description |
+|---|---|---|
+| BandName | Name | Human-readable label for the band |
+| FloorMin | Integer | First floor number in this band |
+| FloorMax | Integer | Last floor number in this band |
+| MinEnemiesPerRoom | Integer | Minimum enemies spawned per combat room |
+| MaxEnemiesPerRoom | Integer | Maximum enemies spawned per combat room |
+| LootChestChance | Float | Probability (0–1) a room has a chest |
+| TrapChance | Float | Probability (0–1) a room has a trap |
+| PropDensityMin | Float | Minimum prop density multiplier |
+| PropDensityMax | Float | Maximum prop density multiplier |
+
+---
+
+### Data
+
+| Row | BandName | FloorMin | FloorMax | MinEnemies | MaxEnemies | LootChest% | Trap% | PropMin | PropMax |
+|---|---|---|---|---|---|---|---|---|---|
+| Band_01 | Floors 1-10 | 1 | 10 | 2 | 3 | 0.30 | 0.10 | 0.20 | 0.40 |
+| Band_02 | Floors 11-20 | 11 | 20 | 2 | 4 | 0.30 | 0.20 | 0.30 | 0.50 |
+| Band_03 | Floors 21-30 | 21 | 30 | 3 | 4 | 0.40 | 0.20 | 0.30 | 0.50 |
+| Band_04 | Floors 31-40 | 31 | 40 | 3 | 5 | 0.40 | 0.30 | 0.40 | 0.60 |
+| Band_05 | Floors 41-50 | 41 | 50 | 4 | 5 | 0.50 | 0.30 | 0.40 | 0.60 |
+| Band_06 | Floors 51-60 | 51 | 60 | 4 | 6 | 0.50 | 0.40 | 0.50 | 0.70 |
+| Band_07 | Floors 61-70 | 61 | 70 | 5 | 6 | 0.50 | 0.40 | 0.50 | 0.70 |
+| Band_08 | Floors 71-80 | 71 | 80 | 5 | 7 | 0.60 | 0.50 | 0.60 | 0.80 |
+| Band_09 | Floors 81-90 | 81 | 90 | 6 | 7 | 0.60 | 0.50 | 0.60 | 0.80 |
+| Band_10 | Floors 91-100 | 91 | 100 | 6 | 8 | 0.70 | 0.60 | 0.70 | 1.00 |
+
+---
+
+---
+
+## E_DoorState
+
+**Type:** Enum
+**Purpose:** Tracks the current state of a door actor.
+
+| Value | Description |
+|---|---|
+| Locked | Door is locked and cannot be opened |
+| Unlocked | Door has been unlocked and can be opened |
+| Opened | Door has been opened |
+
+---
+
+## E_RoomState
+
+**Type:** Enum
+**Purpose:** Tracks the current state of a room.
+
+| Value | Description |
+|---|---|
+| Locked | Room is locked; player cannot progress |
+| Active | Room is active; enemies are alive |
+| Cleared | Room has been cleared; doors are unlocked |
+
+---
+
+## E_RoomType
+
+**Type:** Enum
+**Purpose:** Defines the type of a room, used by the dungeon generator to select the correct room class and configure spawn behaviour.
+
+| Value | Description |
+|---|---|
+| Combat | Standard combat room with enemies |
+| Loot | Reward room with a guaranteed chest, no enemies |
+| SavePoint | Save point room where the player can spend Essences |
+| Boss | Boss room; ends the floor on clear |
+
+---
+
+## S_FloorBandData
+
+**Type:** Struct
+**Purpose:** Row struct for `DT_FloorBands`. Defines difficulty parameters for a range of floors.
+
+| Field | Type | Default |
+|---|---|---|
+| BandName | Name | None |
+| FloorMin | Integer | 0 |
+| FloorMax | Integer | 0 |
+| MinEnemiesPerRoom | Integer | 0 |
+| MaxEnemiesPerRoom | Integer | 0 |
+| LootChestChance | Float | 0.0 |
+| TrapChance | Float | 0.0 |
+| PropDensityMin | Float | 0.0 |
+| PropDensityMax | Float | 0.0 |
+
+---
+
+## S_RoomSpawnData
+
+**Type:** Struct
+**Purpose:** Passed from `BP_DungeonGenerator` to each room via `SetupRoom`. Contains all parameters needed to configure and populate a room.
+
+| Field | Type | Default |
+|---|---|---|
+| RoomType | E_RoomType | Combat |
+| FloorNumber | Integer | 0 |
+| EnemyCount | Integer | 0 |
+| EnemyTypes | Array of Actor (class ref) | 0 elements |
+| bHasLootChest | Boolean | false |
+| bHasTrap | Boolean | false |
+| PropDensity | Float | 0.0 |
+| bIsFinalRoom | Boolean | false |
+
+---
+
+---
+
+## BP_ThirdPersonCharacter
+
+**Parent Class:** Character
+**Type:** Character Blueprint
+**Purpose:** The player character. Handles input, delegates to component systems (Combat, Inventory, Stats, Weapon, LockOn), and owns the HUD.
+
+---
+
+### Components
+| Name | Type |
+|---|---|
+| CameraBoom | Spring Arm Component |
+| FollowCamera | Camera Component |
+| InventoryComponent | BP_InventoryComponent |
+| LockOnComponent | BP_LockOnComponent |
+| WeaponComponent | BP_WeaponComponent |
+| CombatComponent | BP_CombatComponent |
+| StatsComponent | BP_StatsComponent |
+
+---
+
+### Variables
+| Category | Name | Type |
+|---|---|---|
+| Camera | FollowCamera | Camera Component ref |
+| Camera | CameraBoom | Spring Arm ref |
+| Components | InventoryComponent | BP_InventoryComponent ref |
+| Components | LockOnComponent | BP_LockOnComponent ref |
+| Components | WeaponComponent | BP_WeaponComponent ref |
+| Components | CombatComponent | BP_CombatComponent ref |
+| Components | StatsComponent | BP_StatsComponent ref |
+| — | PlayerHUD | WBP_Player ref |
+| — | InitCombatTimerHandle | Timer Handle |
+| — | EquippedWeapon | BP_Weapon ref |
+
+---
+
+### Interfaces
+- **BPI_Touch_Interface:** Touch Jump End, Touch Jump Start, Secondary Thumbstick, Primary Thumbstick
+
+---
+
+### Functions (Overridable)
+| Name | Note |
+|---|---|
+| Construction Script | |
+| Move | Handles movement input |
+| Aim | Handles aim/camera input |
+
+---
+
+### Class Defaults
+| Property | Value |
+|---|---|
+| Skeletal Mesh | SKM_Quinn_Simple |
+| Mesh Location | (0.0, 0.0, -89.0) |
+| Mesh Rotation | (-6.0°, 0.0°, 270.0°) |
+| Animation Mode | Use Animation Blueprint |
+| Anim Class | ABP_Quanim |
+| Materials | M_Quinn_01, M_Quinn_02 |
+| Crouched Eye Height | 32.0 |
+| Base Eye Height | 64.0 |
+| Player HUD | None |
+| Start with Tick Enabled | true |
+
+---
+
+### Event Graph
+
+**IA_Jump (EnhancedInputAction):**
+- **Triggered** → **Branch** (Condition: `CombatComponent → Is Dodging`)
+  - **True** → **Jump** (Target: self)
+  - **False** → **Stop Jumping** (Target: self)
+- **Event Touch Jump Start** *(BPI Touch Interface)* → same as Triggered path
+- **Event Touch Jump End** *(BPI Touch Interface)* → **Stop Jumping** (Target: self)
+
+---
+
+**IA_Dodge (EnhancedInputAction):**
+- **Triggered** →
+  1. **Can Interrupt Attack** (Target: CombatComponent)
+  2. **Branch** (Condition: Can Interrupt)
+     - **True** → **Interrupt Attack** (CombatComponent)
+     - **False** → (continues without interrupting)
+  3. **Try Execute Dodge** (Target: CombatComponent, Direction: **Normalize**(**Get Velocity**(self), Tolerance: 0.0001))
+     - **Success=True** → end
+     - **Success=False** → **Add to Input Buffer** (Target: CombatComponent, Attack Type: Dodge)
+
+---
+
+**IA_Block (EnhancedInputAction):**
+- **Started** →
+  1. **Can Interrupt Attack** (Target: CombatComponent)
+  2. **Branch** (Condition: Can Interrupt)
+     - **True** → **Interrupt Attack** (CombatComponent) → **Start Blocking** (CombatComponent)
+     - **False** → end
+- **Completed** → **Stop Blocking** (Target: CombatComponent)
+
+---
+
+**IA_Attack (EnhancedInputAction):**
+- **Triggered** →
+  1. **Try Execute Attack** (Target: **Get Component by Class**(self, BP_CombatComponent), Attack Type: `Light`)
+  2. **Branch** (Condition: Success)
+     - **True** → end
+     - **False** → **Add to Input Buffer** (Target: CombatComponent, Attack Type: Light)
+
+---
+
+**IA_LockOn (EnhancedInputAction):**
+- **Started** → **Toggle Lock On** (Target: **Get Component by Class**(self, BP_LockOnComponent))
+
+---
+
+**Event BeginPlay:**
+1. **Branch** — Condition: **Is Valid** (**Get Anim Instance**(Mesh))
+   - **False** → **Set Timer by Event** (Event: TryInitializeCombat, Time: 0.05, Looping: true)
+   - **True** →
+2. **Initialize Combat** (Target: CombatComponent)
+3. **Set Timer by Event** (Event: TryInitializeCombat, Time: 0.05, Looping: true)
+4. **Create WBP Player HUD Widget** (Class: WBP_PlayerHUD, Owning Player: **Get Player Controller**(0), Stats Component: StatsComponent)
+5. **SET** Stats Component on widget = StatsComponent
+6. **SET** `Player HUD` = widget Return Value
+7. **Add to Viewport** (Target: PlayerHUD)
+8. **Get Data Table Row** `DT_TestWeapons` (Row Name: `TestSword`)
+   - **Row Not Found** → end
+   - **Row Found** →
+9. **Break S_WeaponData** — unpacks: WeaponID, WeaponName, WeaponClass, WeaponMesh, SocketName, LightAttack[], HeavyAttack[], BlockPercentage, StaminaCostPerBlock, WeaponWeight
+10. **Branch** — Condition: `LENGTH(LightAttack) > 0`
+    - **False** → **Print String** `"ERROR: No attacks in data table!"` *(Dev Only)* → end
+    - **True** →
+11. **Spawn Actor** `BP_Weapon_BlackKnightSword` (Transform: **Get Actor Transform**(self), Collision: Default)
+12. **SET** `Equipped Weapon` = Return Value
+13. **Attach Actor To Component** (Target: EquippedWeapon, Parent: Mesh, Socket: `"Weapon_R"`, Location Rule: Snap to Target, Rotation Rule: Snap to Target, Scale Rule: Keep World, Weld Simulated Bodies: true)
+14. **Set Weapon Reference** (Target: **Get Component by Class**(self, BP_WeaponComponent), Weapon: EquippedWeapon)
+15. **Initialize Weapon** (Target: WeaponComponent, Weapon Data: from Break S_WeaponData)
+
+---
+
+**TryInitializeCombat** *(Custom Event):*
+1. **Branch** — Condition: **Is Valid** (**Get Anim Instance**(Mesh))
+   - **False** → end (loop continues until anim instance is ready)
+   - **True** →
+2. **Initialize Combat** (Target: CombatComponent)
+3. **Set Timer by Function Name** (Object: self, Function Name: `"CleanInputBuffer"`, Time: 0.1, Looping: true)
+4. **Clear and Invalidate Timer by Handle** (Handle: `InitCombatTimerHandle`)
+
+> BeginPlay polls until the anim instance is valid before initialising combat, ensuring the animation blueprint is ready before combat systems start. Weapon is hardcoded to TestSword row from DT_TestWeapons at startup.
+
+---
+
+#### Aim (Function)
+**Graph:** BP_ThirdPersonCharacter > Aim
+**Inputs:** X Axis (Float), Y Axis (Float)
+
+**Logic:**
+1. **Add Controller Yaw Input** (Target: self, Val: X Axis) *(Left/Right)*
+2. **Add Controller Pitch Input** (Target: self, Val: Y Axis) *(Up/Down)*
+
+---
+
+#### Move (Function)
+**Graph:** BP_ThirdPersonCharacter > Move
+**Inputs:** X Axis (Float), Y Axis (Float)
+
+**Logic:**
+
+*Left/Right:*
+1. **Get Control Rotation** (Target: self) → Yaw
+2. **Get Right Vector** (In Rot X: 0.0, In Rot Y: 0.0, In Rot Z: Yaw)
+3. **Add Movement Input** (Target: self, World Direction: Right Vector, Scale Value: X Axis)
+
+*Forward/Backward:*
+1. **Get Control Rotation** (Target: self) → Yaw
+2. **Get Forward Vector** (In Rot X: 0.0, In Rot Y: 0.0, In Rot Z: Yaw)
+3. **Add Movement Input** (Target: self, World Direction: Forward Vector, Scale Value: Y Axis)
+
+> Both axes use only the Yaw component of the control rotation, keeping movement flat relative to the camera direction regardless of pitch.
+
+---
